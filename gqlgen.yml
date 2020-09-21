@@ -1,0 +1,24 @@
+schema:
+  - graph/schema.graphql
+
+model:
+  filename: graph/models/generated.go
+
+exec:
+  filename: graph/generated/generated.go
+  package: generated
+  
+resolver:
+  layout: follow-schema
+  dir: graph
+
+autobind:
+  - github.com/francismarcus/eg/ent
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.IntID
+  Node:
+    model:
+      - github.com/francismarcus/eg/ent.Noder

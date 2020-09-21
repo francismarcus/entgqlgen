@@ -1,0 +1,320 @@
+scalar Cursor
+scalar Time
+
+directive @log on FIELD_DEFINITION
+directive @hasID on FIELD_DEFINITION
+
+interface Node {
+  id: ID!
+}
+
+enum OrderDirection {
+  ASC
+  DESC
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: Cursor
+  endCursor: Cursor
+}
+
+enum Gender {
+  MALE
+  FEMALE
+  NONE
+}
+
+enum Level {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+type UserSettings implements Node {
+  id: ID!
+  gender: Gender
+  age: Int
+  weight: Int
+  height: Int
+  level: Level
+  user: User!
+}
+
+type User implements Node {
+  id: ID!
+  createdAt: Time
+  updatedAt: Time
+  email: String!
+  username: String!
+  settings: UserSettings
+  programs(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: ProgramOrder
+  ): ProgramConnection
+  followers(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: UserOrder
+  ): UserConnection
+  follows(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: UserOrder
+  ): UserConnection
+  shouts(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: ShoutOrder
+  ): ShoutConnection
+  followersCount: Int!
+  followsCount: Int!
+  shoutsCount: Int!
+}
+
+type UserEdge {
+  node: User
+  cursor: Cursor
+}
+
+type UserConnection {
+  pageInfo: PageInfo
+  edges: [UserEdge]
+}
+
+enum UserOrderField {
+  CREATED_AT
+  UPDATED_AT
+}
+
+input UserOrder {
+  direction: OrderDirection!
+  field: UserOrderField
+}
+
+type Program implements Node {
+  id: ID!
+  createdAt: Time
+  name: String!
+  author: User!
+  workouts(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: WorkoutOrder
+  ): WorkoutConnection
+}
+
+type ProgramEdge {
+  node: Program
+  cursor: Cursor
+}
+
+type ProgramConnection {
+  pageInfo: PageInfo
+  edges: [ProgramEdge]
+}
+
+enum ProgramOrderField {
+  CREATED_AT
+  UPDATED_AT
+}
+
+enum ShoutOrderField {
+  LIKES
+  CREATED_AT
+  UPDATED_AT
+}
+
+input ProgramOrder {
+  direction: OrderDirection!
+  field: ProgramOrderField
+}
+
+type Workout implements Node {
+  id: ID!
+  name: String!
+  program: Program!
+}
+
+type WorkoutEdge {
+  node: Workout
+  cursor: Cursor
+}
+
+type WorkoutConnection {
+  pageInfo: PageInfo
+  edges: [WorkoutEdge]
+}
+
+enum WorkoutOrderField {
+  CREATED_AT
+  UPDATED_AT
+}
+
+input WorkoutOrder {
+  direction: OrderDirection!
+  field: WorkoutOrderField
+}
+
+input ShoutOrder {
+  direction: OrderDirection!
+  field: ShoutOrderField
+}
+
+type Shout implements Node {
+  id: ID!
+  message: String!
+  author: User!
+  createdAt: Time
+  likedBy: [User]
+  likes: Int
+}
+
+type ShoutEdge {
+  node: Shout
+  cursor: Cursor
+}
+
+type ShoutConnection {
+  pageInfo: PageInfo
+  edges: [ShoutEdge]
+}
+
+input LoginInput {
+  username: String!
+  password: String!
+}
+
+input SignupInput {
+  username: String!
+  password: String!
+  email: String!
+}
+
+type AuthPayload {
+  user: User
+  token: String
+}
+
+input CreateProgramInput {
+  name: String!
+  userID: ID!
+}
+
+input FollowUserInput {
+  followID: ID!
+  userID: ID!
+}
+
+input UnFollowUserInput {
+  followID: ID!
+  userID: ID!
+}
+
+type Query {
+  whoami: User! @log
+  ping: String!
+  node(id: ID!): Node
+  me(id: ID!): User! @hasID
+  users(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: UserOrder
+  ): UserConnection
+  programs(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: ProgramOrder
+  ): ProgramConnection
+  feed(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: ShoutOrder
+    id: ID!
+  ): ShoutConnection @hasID
+  shouts(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: ShoutOrder
+  ): ShoutConnection
+  programByID(id: ID!): Program!
+  myPrograms(
+    after: Cursor
+    first: Int
+    before: Cursor
+    last: Int
+    orderBy: ProgramOrder
+    id: ID!
+  ): ProgramConnection!
+}
+
+input CreateShoutInput {
+  message: String!
+  userID: ID!
+}
+
+input LikeShoutInput {
+  ShoutID: ID!
+  UserID: ID!
+}
+
+input UnlikeShoutInput {
+  ShoutID: ID!
+  UserID: ID!
+}
+
+input UserSettingsInput {
+  gender: Gender
+  age: Int
+  weight: Int
+  height: Int
+  level: Level
+}
+
+input AddUserSettingsInput {
+  userID: ID!
+  settings: UserSettingsInput
+}
+
+input WorkoutInput {
+  name: String!
+}
+
+input CreateWorkoutInput {
+  userID: ID!
+  workout: WorkoutInput
+}
+
+type Mutation {
+  usernameAvailable(username: String!): Boolean
+  login(input: LoginInput!): AuthPayload @log
+  signup(input: SignupInput!): AuthPayload
+  createProgram(input: CreateProgramInput!): Program!
+  createWorkout(input: CreateWorkoutInput!): Workout!
+  createShout(input: CreateShoutInput!): Shout!
+  likeShout(input: LikeShoutInput!): Shout!
+  unlikeShout(input: UnlikeShoutInput!): Shout!
+  followUser(input: FollowUserInput!): User
+  unFollowUser(input: UnFollowUserInput!): User
+  addUserSettings(input: AddUserSettingsInput!): UserSettings!
+}
