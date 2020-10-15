@@ -8,11 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/francismarcus/eg/ent/program"
-	"github.com/francismarcus/eg/ent/shout"
+	"github.com/francismarcus/eg/ent/diet"
 	"github.com/francismarcus/eg/ent/user"
 	"github.com/francismarcus/eg/ent/usersettings"
-	"github.com/francismarcus/eg/ent/workout"
 
 	"github.com/facebook/ent"
 )
@@ -26,37 +24,43 @@ const (
 	OpUpdateOne = ent.OpUpdateOne
 
 	// Node types.
-	TypeExercise     = "Exercise"
-	TypeProgram      = "Program"
-	TypeShout        = "Shout"
+	TypeDiet         = "Diet"
 	TypeUser         = "User"
 	TypeUserSettings = "UserSettings"
-	TypeWorkout      = "Workout"
 )
 
-// ExerciseMutation represents an operation that mutate the Exercises
+// DietMutation represents an operation that mutate the Diets
 // nodes in the graph.
-type ExerciseMutation struct {
+type DietMutation struct {
 	config
-	op            Op
-	typ           string
-	id            *int
-	clearedFields map[string]struct{}
-	done          bool
-	oldValue      func(context.Context) (*Exercise, error)
+	op             Op
+	typ            string
+	id             *int
+	created_at     *time.Time
+	updated_at     *time.Time
+	name           *string
+	goal_weight    *int
+	addgoal_weight *int
+	length         *int
+	addlength      *int
+	clearedFields  map[string]struct{}
+	author         *int
+	clearedauthor  bool
+	done           bool
+	oldValue       func(context.Context) (*Diet, error)
 }
 
-var _ ent.Mutation = (*ExerciseMutation)(nil)
+var _ ent.Mutation = (*DietMutation)(nil)
 
-// exerciseOption allows to manage the mutation configuration using functional options.
-type exerciseOption func(*ExerciseMutation)
+// dietOption allows to manage the mutation configuration using functional options.
+type dietOption func(*DietMutation)
 
-// newExerciseMutation creates new mutation for $n.Name.
-func newExerciseMutation(c config, op Op, opts ...exerciseOption) *ExerciseMutation {
-	m := &ExerciseMutation{
+// newDietMutation creates new mutation for $n.Name.
+func newDietMutation(c config, op Op, opts ...dietOption) *DietMutation {
+	m := &DietMutation{
 		config:        c,
 		op:            op,
-		typ:           TypeExercise,
+		typ:           TypeDiet,
 		clearedFields: make(map[string]struct{}),
 	}
 	for _, opt := range opts {
@@ -65,20 +69,20 @@ func newExerciseMutation(c config, op Op, opts ...exerciseOption) *ExerciseMutat
 	return m
 }
 
-// withExerciseID sets the id field of the mutation.
-func withExerciseID(id int) exerciseOption {
-	return func(m *ExerciseMutation) {
+// withDietID sets the id field of the mutation.
+func withDietID(id int) dietOption {
+	return func(m *DietMutation) {
 		var (
 			err   error
 			once  sync.Once
-			value *Exercise
+			value *Diet
 		)
-		m.oldValue = func(ctx context.Context) (*Exercise, error) {
+		m.oldValue = func(ctx context.Context) (*Diet, error) {
 			once.Do(func() {
 				if m.done {
 					err = fmt.Errorf("querying old values post mutation is not allowed")
 				} else {
-					value, err = m.Client().Exercise.Get(ctx, id)
+					value, err = m.Client().Diet.Get(ctx, id)
 				}
 			})
 			return value, err
@@ -87,10 +91,10 @@ func withExerciseID(id int) exerciseOption {
 	}
 }
 
-// withExercise sets the old Exercise of the mutation.
-func withExercise(node *Exercise) exerciseOption {
-	return func(m *ExerciseMutation) {
-		m.oldValue = func(context.Context) (*Exercise, error) {
+// withDiet sets the old Diet of the mutation.
+func withDiet(node *Diet) dietOption {
+	return func(m *DietMutation) {
+		m.oldValue = func(context.Context) (*Diet, error) {
 			return node, nil
 		}
 		m.id = &node.ID
@@ -99,7 +103,7 @@ func withExercise(node *Exercise) exerciseOption {
 
 // Client returns a new `ent.Client` from the mutation. If the mutation was
 // executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ExerciseMutation) Client() *Client {
+func (m DietMutation) Client() *Client {
 	client := &Client{config: m.config}
 	client.init()
 	return client
@@ -107,7 +111,7 @@ func (m ExerciseMutation) Client() *Client {
 
 // Tx returns an `ent.Tx` for mutations that were executed in transactions;
 // it returns an error otherwise.
-func (m ExerciseMutation) Tx() (*Tx, error) {
+func (m DietMutation) Tx() (*Tx, error) {
 	if _, ok := m.driver.(*txDriver); !ok {
 		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
 	}
@@ -118,245 +122,7 @@ func (m ExerciseMutation) Tx() (*Tx, error) {
 
 // ID returns the id value in the mutation. Note that, the id
 // is available only if it was provided to the builder.
-func (m *ExerciseMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// Op returns the operation name.
-func (m *ExerciseMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (Exercise).
-func (m *ExerciseMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during
-// this mutation. Note that, in order to get all numeric
-// fields that were in/decremented, call AddedFields().
-func (m *ExerciseMutation) Fields() []string {
-	fields := make([]string, 0, 0)
-	return fields
-}
-
-// Field returns the value of a field with the given name.
-// The second boolean value indicates that this field was
-// not set, or was not define in the schema.
-func (m *ExerciseMutation) Field(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database.
-// An error is returned if the mutation operation is not UpdateOne,
-// or the query to the database was failed.
-func (m *ExerciseMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	return nil, fmt.Errorf("unknown Exercise field %s", name)
-}
-
-// SetField sets the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
-func (m *ExerciseMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Exercise field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented
-// or decremented during this mutation.
-func (m *ExerciseMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was in/decremented
-// from a field with the given name. The second value indicates
-// that this field was not set, or was not define in the schema.
-func (m *ExerciseMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
-func (m *ExerciseMutation) AddField(name string, value ent.Value) error {
-	return fmt.Errorf("unknown Exercise numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared
-// during this mutation.
-func (m *ExerciseMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicates if this field was
-// cleared in this mutation.
-func (m *ExerciseMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value for the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *ExerciseMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Exercise nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation regarding the
-// given field name. It returns an error if the field is not
-// defined in the schema.
-func (m *ExerciseMutation) ResetField(name string) error {
-	return fmt.Errorf("unknown Exercise field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this
-// mutation.
-func (m *ExerciseMutation) AddedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// AddedIDs returns all ids (to other nodes) that were added for
-// the given edge name.
-func (m *ExerciseMutation) AddedIDs(name string) []ent.Value {
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this
-// mutation.
-func (m *ExerciseMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// RemovedIDs returns all ids (to other nodes) that were removed for
-// the given edge name.
-func (m *ExerciseMutation) RemovedIDs(name string) []ent.Value {
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this
-// mutation.
-func (m *ExerciseMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 0)
-	return edges
-}
-
-// EdgeCleared returns a boolean indicates if this edge was
-// cleared in this mutation.
-func (m *ExerciseMutation) EdgeCleared(name string) bool {
-	return false
-}
-
-// ClearEdge clears the value for the given name. It returns an
-// error if the edge name is not defined in the schema.
-func (m *ExerciseMutation) ClearEdge(name string) error {
-	return fmt.Errorf("unknown Exercise unique edge %s", name)
-}
-
-// ResetEdge resets all changes in the mutation regarding the
-// given edge name. It returns an error if the edge is not
-// defined in the schema.
-func (m *ExerciseMutation) ResetEdge(name string) error {
-	return fmt.Errorf("unknown Exercise edge %s", name)
-}
-
-// ProgramMutation represents an operation that mutate the Programs
-// nodes in the graph.
-type ProgramMutation struct {
-	config
-	op              Op
-	typ             string
-	id              *int
-	created_at      *time.Time
-	updated_at      *time.Time
-	name            *string
-	clearedFields   map[string]struct{}
-	author          *int
-	clearedauthor   bool
-	workouts        map[int]struct{}
-	removedworkouts map[int]struct{}
-	clearedworkouts bool
-	done            bool
-	oldValue        func(context.Context) (*Program, error)
-}
-
-var _ ent.Mutation = (*ProgramMutation)(nil)
-
-// programOption allows to manage the mutation configuration using functional options.
-type programOption func(*ProgramMutation)
-
-// newProgramMutation creates new mutation for $n.Name.
-func newProgramMutation(c config, op Op, opts ...programOption) *ProgramMutation {
-	m := &ProgramMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeProgram,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withProgramID sets the id field of the mutation.
-func withProgramID(id int) programOption {
-	return func(m *ProgramMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Program
-		)
-		m.oldValue = func(ctx context.Context) (*Program, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Program.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withProgram sets the old Program of the mutation.
-func withProgram(node *Program) programOption {
-	return func(m *ProgramMutation) {
-		m.oldValue = func(context.Context) (*Program, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ProgramMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m ProgramMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the id value in the mutation. Note that, the id
-// is available only if it was provided to the builder.
-func (m *ProgramMutation) ID() (id int, exists bool) {
+func (m *DietMutation) ID() (id int, exists bool) {
 	if m.id == nil {
 		return
 	}
@@ -364,12 +130,12 @@ func (m *ProgramMutation) ID() (id int, exists bool) {
 }
 
 // SetCreatedAt sets the created_at field.
-func (m *ProgramMutation) SetCreatedAt(t time.Time) {
+func (m *DietMutation) SetCreatedAt(t time.Time) {
 	m.created_at = &t
 }
 
 // CreatedAt returns the created_at value in the mutation.
-func (m *ProgramMutation) CreatedAt() (r time.Time, exists bool) {
+func (m *DietMutation) CreatedAt() (r time.Time, exists bool) {
 	v := m.created_at
 	if v == nil {
 		return
@@ -377,11 +143,11 @@ func (m *ProgramMutation) CreatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldCreatedAt returns the old created_at value of the Program.
-// If the Program object wasn't provided to the builder, the object is fetched
+// OldCreatedAt returns the old created_at value of the Diet.
+// If the Diet object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *ProgramMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *DietMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
 	}
@@ -396,17 +162,17 @@ func (m *ProgramMutation) OldCreatedAt(ctx context.Context) (v time.Time, err er
 }
 
 // ResetCreatedAt reset all changes of the "created_at" field.
-func (m *ProgramMutation) ResetCreatedAt() {
+func (m *DietMutation) ResetCreatedAt() {
 	m.created_at = nil
 }
 
 // SetUpdatedAt sets the updated_at field.
-func (m *ProgramMutation) SetUpdatedAt(t time.Time) {
+func (m *DietMutation) SetUpdatedAt(t time.Time) {
 	m.updated_at = &t
 }
 
 // UpdatedAt returns the updated_at value in the mutation.
-func (m *ProgramMutation) UpdatedAt() (r time.Time, exists bool) {
+func (m *DietMutation) UpdatedAt() (r time.Time, exists bool) {
 	v := m.updated_at
 	if v == nil {
 		return
@@ -414,11 +180,11 @@ func (m *ProgramMutation) UpdatedAt() (r time.Time, exists bool) {
 	return *v, true
 }
 
-// OldUpdatedAt returns the old updated_at value of the Program.
-// If the Program object wasn't provided to the builder, the object is fetched
+// OldUpdatedAt returns the old updated_at value of the Diet.
+// If the Diet object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *ProgramMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
+func (m *DietMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
 	}
@@ -433,17 +199,17 @@ func (m *ProgramMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err er
 }
 
 // ResetUpdatedAt reset all changes of the "updated_at" field.
-func (m *ProgramMutation) ResetUpdatedAt() {
+func (m *DietMutation) ResetUpdatedAt() {
 	m.updated_at = nil
 }
 
 // SetName sets the name field.
-func (m *ProgramMutation) SetName(s string) {
+func (m *DietMutation) SetName(s string) {
 	m.name = &s
 }
 
 // Name returns the name value in the mutation.
-func (m *ProgramMutation) Name() (r string, exists bool) {
+func (m *DietMutation) Name() (r string, exists bool) {
 	v := m.name
 	if v == nil {
 		return
@@ -451,11 +217,11 @@ func (m *ProgramMutation) Name() (r string, exists bool) {
 	return *v, true
 }
 
-// OldName returns the old name value of the Program.
-// If the Program object wasn't provided to the builder, the object is fetched
+// OldName returns the old name value of the Diet.
+// If the Diet object wasn't provided to the builder, the object is fetched
 // from the database.
 // An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *ProgramMutation) OldName(ctx context.Context) (v string, err error) {
+func (m *DietMutation) OldName(ctx context.Context) (v string, err error) {
 	if !m.op.Is(OpUpdateOne) {
 		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
 	}
@@ -470,27 +236,141 @@ func (m *ProgramMutation) OldName(ctx context.Context) (v string, err error) {
 }
 
 // ResetName reset all changes of the "name" field.
-func (m *ProgramMutation) ResetName() {
+func (m *DietMutation) ResetName() {
 	m.name = nil
 }
 
+// SetGoalWeight sets the goal_weight field.
+func (m *DietMutation) SetGoalWeight(i int) {
+	m.goal_weight = &i
+	m.addgoal_weight = nil
+}
+
+// GoalWeight returns the goal_weight value in the mutation.
+func (m *DietMutation) GoalWeight() (r int, exists bool) {
+	v := m.goal_weight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldGoalWeight returns the old goal_weight value of the Diet.
+// If the Diet object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *DietMutation) OldGoalWeight(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldGoalWeight is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldGoalWeight requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldGoalWeight: %w", err)
+	}
+	return oldValue.GoalWeight, nil
+}
+
+// AddGoalWeight adds i to goal_weight.
+func (m *DietMutation) AddGoalWeight(i int) {
+	if m.addgoal_weight != nil {
+		*m.addgoal_weight += i
+	} else {
+		m.addgoal_weight = &i
+	}
+}
+
+// AddedGoalWeight returns the value that was added to the goal_weight field in this mutation.
+func (m *DietMutation) AddedGoalWeight() (r int, exists bool) {
+	v := m.addgoal_weight
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetGoalWeight reset all changes of the "goal_weight" field.
+func (m *DietMutation) ResetGoalWeight() {
+	m.goal_weight = nil
+	m.addgoal_weight = nil
+}
+
+// SetLength sets the length field.
+func (m *DietMutation) SetLength(i int) {
+	m.length = &i
+	m.addlength = nil
+}
+
+// Length returns the length value in the mutation.
+func (m *DietMutation) Length() (r int, exists bool) {
+	v := m.length
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// OldLength returns the old length value of the Diet.
+// If the Diet object wasn't provided to the builder, the object is fetched
+// from the database.
+// An error is returned if the mutation operation is not UpdateOne, or database query fails.
+func (m *DietMutation) OldLength(ctx context.Context) (v int, err error) {
+	if !m.op.Is(OpUpdateOne) {
+		return v, fmt.Errorf("OldLength is allowed only on UpdateOne operations")
+	}
+	if m.id == nil || m.oldValue == nil {
+		return v, fmt.Errorf("OldLength requires an ID field in the mutation")
+	}
+	oldValue, err := m.oldValue(ctx)
+	if err != nil {
+		return v, fmt.Errorf("querying old value for OldLength: %w", err)
+	}
+	return oldValue.Length, nil
+}
+
+// AddLength adds i to length.
+func (m *DietMutation) AddLength(i int) {
+	if m.addlength != nil {
+		*m.addlength += i
+	} else {
+		m.addlength = &i
+	}
+}
+
+// AddedLength returns the value that was added to the length field in this mutation.
+func (m *DietMutation) AddedLength() (r int, exists bool) {
+	v := m.addlength
+	if v == nil {
+		return
+	}
+	return *v, true
+}
+
+// ResetLength reset all changes of the "length" field.
+func (m *DietMutation) ResetLength() {
+	m.length = nil
+	m.addlength = nil
+}
+
 // SetAuthorID sets the author edge to User by id.
-func (m *ProgramMutation) SetAuthorID(id int) {
+func (m *DietMutation) SetAuthorID(id int) {
 	m.author = &id
 }
 
 // ClearAuthor clears the author edge to User.
-func (m *ProgramMutation) ClearAuthor() {
+func (m *DietMutation) ClearAuthor() {
 	m.clearedauthor = true
 }
 
 // AuthorCleared returns if the edge author was cleared.
-func (m *ProgramMutation) AuthorCleared() bool {
+func (m *DietMutation) AuthorCleared() bool {
 	return m.clearedauthor
 }
 
 // AuthorID returns the author id in the mutation.
-func (m *ProgramMutation) AuthorID() (id int, exists bool) {
+func (m *DietMutation) AuthorID() (id int, exists bool) {
 	if m.author != nil {
 		return *m.author, true
 	}
@@ -500,7 +380,7 @@ func (m *ProgramMutation) AuthorID() (id int, exists bool) {
 // AuthorIDs returns the author ids in the mutation.
 // Note that ids always returns len(ids) <= 1 for unique edges, and you should use
 // AuthorID instead. It exists only for internal usage by the builders.
-func (m *ProgramMutation) AuthorIDs() (ids []int) {
+func (m *DietMutation) AuthorIDs() (ids []int) {
 	if id := m.author; id != nil {
 		ids = append(ids, *id)
 	}
@@ -508,87 +388,40 @@ func (m *ProgramMutation) AuthorIDs() (ids []int) {
 }
 
 // ResetAuthor reset all changes of the "author" edge.
-func (m *ProgramMutation) ResetAuthor() {
+func (m *DietMutation) ResetAuthor() {
 	m.author = nil
 	m.clearedauthor = false
 }
 
-// AddWorkoutIDs adds the workouts edge to Workout by ids.
-func (m *ProgramMutation) AddWorkoutIDs(ids ...int) {
-	if m.workouts == nil {
-		m.workouts = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.workouts[ids[i]] = struct{}{}
-	}
-}
-
-// ClearWorkouts clears the workouts edge to Workout.
-func (m *ProgramMutation) ClearWorkouts() {
-	m.clearedworkouts = true
-}
-
-// WorkoutsCleared returns if the edge workouts was cleared.
-func (m *ProgramMutation) WorkoutsCleared() bool {
-	return m.clearedworkouts
-}
-
-// RemoveWorkoutIDs removes the workouts edge to Workout by ids.
-func (m *ProgramMutation) RemoveWorkoutIDs(ids ...int) {
-	if m.removedworkouts == nil {
-		m.removedworkouts = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedworkouts[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedWorkouts returns the removed ids of workouts.
-func (m *ProgramMutation) RemovedWorkoutsIDs() (ids []int) {
-	for id := range m.removedworkouts {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// WorkoutsIDs returns the workouts ids in the mutation.
-func (m *ProgramMutation) WorkoutsIDs() (ids []int) {
-	for id := range m.workouts {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetWorkouts reset all changes of the "workouts" edge.
-func (m *ProgramMutation) ResetWorkouts() {
-	m.workouts = nil
-	m.clearedworkouts = false
-	m.removedworkouts = nil
-}
-
 // Op returns the operation name.
-func (m *ProgramMutation) Op() Op {
+func (m *DietMutation) Op() Op {
 	return m.op
 }
 
-// Type returns the node type of this mutation (Program).
-func (m *ProgramMutation) Type() string {
+// Type returns the node type of this mutation (Diet).
+func (m *DietMutation) Type() string {
 	return m.typ
 }
 
 // Fields returns all fields that were changed during
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
-func (m *ProgramMutation) Fields() []string {
-	fields := make([]string, 0, 3)
+func (m *DietMutation) Fields() []string {
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
-		fields = append(fields, program.FieldCreatedAt)
+		fields = append(fields, diet.FieldCreatedAt)
 	}
 	if m.updated_at != nil {
-		fields = append(fields, program.FieldUpdatedAt)
+		fields = append(fields, diet.FieldUpdatedAt)
 	}
 	if m.name != nil {
-		fields = append(fields, program.FieldName)
+		fields = append(fields, diet.FieldName)
+	}
+	if m.goal_weight != nil {
+		fields = append(fields, diet.FieldGoalWeight)
+	}
+	if m.length != nil {
+		fields = append(fields, diet.FieldLength)
 	}
 	return fields
 }
@@ -596,14 +429,18 @@ func (m *ProgramMutation) Fields() []string {
 // Field returns the value of a field with the given name.
 // The second boolean value indicates that this field was
 // not set, or was not define in the schema.
-func (m *ProgramMutation) Field(name string) (ent.Value, bool) {
+func (m *DietMutation) Field(name string) (ent.Value, bool) {
 	switch name {
-	case program.FieldCreatedAt:
+	case diet.FieldCreatedAt:
 		return m.CreatedAt()
-	case program.FieldUpdatedAt:
+	case diet.FieldUpdatedAt:
 		return m.UpdatedAt()
-	case program.FieldName:
+	case diet.FieldName:
 		return m.Name()
+	case diet.FieldGoalWeight:
+		return m.GoalWeight()
+	case diet.FieldLength:
+		return m.Length()
 	}
 	return nil, false
 }
@@ -611,896 +448,258 @@ func (m *ProgramMutation) Field(name string) (ent.Value, bool) {
 // OldField returns the old value of the field from the database.
 // An error is returned if the mutation operation is not UpdateOne,
 // or the query to the database was failed.
-func (m *ProgramMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
+func (m *DietMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
 	switch name {
-	case program.FieldCreatedAt:
+	case diet.FieldCreatedAt:
 		return m.OldCreatedAt(ctx)
-	case program.FieldUpdatedAt:
+	case diet.FieldUpdatedAt:
 		return m.OldUpdatedAt(ctx)
-	case program.FieldName:
+	case diet.FieldName:
 		return m.OldName(ctx)
+	case diet.FieldGoalWeight:
+		return m.OldGoalWeight(ctx)
+	case diet.FieldLength:
+		return m.OldLength(ctx)
 	}
-	return nil, fmt.Errorf("unknown Program field %s", name)
+	return nil, fmt.Errorf("unknown Diet field %s", name)
 }
 
 // SetField sets the value for the given name. It returns an
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
-func (m *ProgramMutation) SetField(name string, value ent.Value) error {
+func (m *DietMutation) SetField(name string, value ent.Value) error {
 	switch name {
-	case program.FieldCreatedAt:
+	case diet.FieldCreatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetCreatedAt(v)
 		return nil
-	case program.FieldUpdatedAt:
+	case diet.FieldUpdatedAt:
 		v, ok := value.(time.Time)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetUpdatedAt(v)
 		return nil
-	case program.FieldName:
+	case diet.FieldName:
 		v, ok := value.(string)
 		if !ok {
 			return fmt.Errorf("unexpected type %T for field %s", value, name)
 		}
 		m.SetName(v)
 		return nil
+	case diet.FieldGoalWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetGoalWeight(v)
+		return nil
+	case diet.FieldLength:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.SetLength(v)
+		return nil
 	}
-	return fmt.Errorf("unknown Program field %s", name)
+	return fmt.Errorf("unknown Diet field %s", name)
 }
 
 // AddedFields returns all numeric fields that were incremented
 // or decremented during this mutation.
-func (m *ProgramMutation) AddedFields() []string {
-	return nil
+func (m *DietMutation) AddedFields() []string {
+	var fields []string
+	if m.addgoal_weight != nil {
+		fields = append(fields, diet.FieldGoalWeight)
+	}
+	if m.addlength != nil {
+		fields = append(fields, diet.FieldLength)
+	}
+	return fields
 }
 
 // AddedField returns the numeric value that was in/decremented
 // from a field with the given name. The second value indicates
 // that this field was not set, or was not define in the schema.
-func (m *ProgramMutation) AddedField(name string) (ent.Value, bool) {
+func (m *DietMutation) AddedField(name string) (ent.Value, bool) {
+	switch name {
+	case diet.FieldGoalWeight:
+		return m.AddedGoalWeight()
+	case diet.FieldLength:
+		return m.AddedLength()
+	}
 	return nil, false
 }
 
 // AddField adds the value for the given name. It returns an
 // error if the field is not defined in the schema, or if the
 // type mismatch the field type.
-func (m *ProgramMutation) AddField(name string, value ent.Value) error {
+func (m *DietMutation) AddField(name string, value ent.Value) error {
 	switch name {
+	case diet.FieldGoalWeight:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddGoalWeight(v)
+		return nil
+	case diet.FieldLength:
+		v, ok := value.(int)
+		if !ok {
+			return fmt.Errorf("unexpected type %T for field %s", value, name)
+		}
+		m.AddLength(v)
+		return nil
 	}
-	return fmt.Errorf("unknown Program numeric field %s", name)
+	return fmt.Errorf("unknown Diet numeric field %s", name)
 }
 
 // ClearedFields returns all nullable fields that were cleared
 // during this mutation.
-func (m *ProgramMutation) ClearedFields() []string {
+func (m *DietMutation) ClearedFields() []string {
 	return nil
 }
 
 // FieldCleared returns a boolean indicates if this field was
 // cleared in this mutation.
-func (m *ProgramMutation) FieldCleared(name string) bool {
+func (m *DietMutation) FieldCleared(name string) bool {
 	_, ok := m.clearedFields[name]
 	return ok
 }
 
 // ClearField clears the value for the given name. It returns an
 // error if the field is not defined in the schema.
-func (m *ProgramMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Program nullable field %s", name)
+func (m *DietMutation) ClearField(name string) error {
+	return fmt.Errorf("unknown Diet nullable field %s", name)
 }
 
 // ResetField resets all changes in the mutation regarding the
 // given field name. It returns an error if the field is not
 // defined in the schema.
-func (m *ProgramMutation) ResetField(name string) error {
+func (m *DietMutation) ResetField(name string) error {
 	switch name {
-	case program.FieldCreatedAt:
+	case diet.FieldCreatedAt:
 		m.ResetCreatedAt()
 		return nil
-	case program.FieldUpdatedAt:
+	case diet.FieldUpdatedAt:
 		m.ResetUpdatedAt()
 		return nil
-	case program.FieldName:
+	case diet.FieldName:
 		m.ResetName()
 		return nil
+	case diet.FieldGoalWeight:
+		m.ResetGoalWeight()
+		return nil
+	case diet.FieldLength:
+		m.ResetLength()
+		return nil
 	}
-	return fmt.Errorf("unknown Program field %s", name)
+	return fmt.Errorf("unknown Diet field %s", name)
 }
 
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
-func (m *ProgramMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
+func (m *DietMutation) AddedEdges() []string {
+	edges := make([]string, 0, 1)
 	if m.author != nil {
-		edges = append(edges, program.EdgeAuthor)
-	}
-	if m.workouts != nil {
-		edges = append(edges, program.EdgeWorkouts)
+		edges = append(edges, diet.EdgeAuthor)
 	}
 	return edges
 }
 
 // AddedIDs returns all ids (to other nodes) that were added for
 // the given edge name.
-func (m *ProgramMutation) AddedIDs(name string) []ent.Value {
+func (m *DietMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case program.EdgeAuthor:
+	case diet.EdgeAuthor:
 		if id := m.author; id != nil {
 			return []ent.Value{*id}
 		}
-	case program.EdgeWorkouts:
-		ids := make([]ent.Value, 0, len(m.workouts))
-		for id := range m.workouts {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
-func (m *ProgramMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedworkouts != nil {
-		edges = append(edges, program.EdgeWorkouts)
-	}
+func (m *DietMutation) RemovedEdges() []string {
+	edges := make([]string, 0, 1)
 	return edges
 }
 
 // RemovedIDs returns all ids (to other nodes) that were removed for
 // the given edge name.
-func (m *ProgramMutation) RemovedIDs(name string) []ent.Value {
+func (m *DietMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case program.EdgeWorkouts:
-		ids := make([]ent.Value, 0, len(m.removedworkouts))
-		for id := range m.removedworkouts {
-			ids = append(ids, id)
-		}
-		return ids
 	}
 	return nil
 }
 
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
-func (m *ProgramMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
+func (m *DietMutation) ClearedEdges() []string {
+	edges := make([]string, 0, 1)
 	if m.clearedauthor {
-		edges = append(edges, program.EdgeAuthor)
-	}
-	if m.clearedworkouts {
-		edges = append(edges, program.EdgeWorkouts)
+		edges = append(edges, diet.EdgeAuthor)
 	}
 	return edges
 }
 
 // EdgeCleared returns a boolean indicates if this edge was
 // cleared in this mutation.
-func (m *ProgramMutation) EdgeCleared(name string) bool {
+func (m *DietMutation) EdgeCleared(name string) bool {
 	switch name {
-	case program.EdgeAuthor:
+	case diet.EdgeAuthor:
 		return m.clearedauthor
-	case program.EdgeWorkouts:
-		return m.clearedworkouts
 	}
 	return false
 }
 
 // ClearEdge clears the value for the given name. It returns an
 // error if the edge name is not defined in the schema.
-func (m *ProgramMutation) ClearEdge(name string) error {
+func (m *DietMutation) ClearEdge(name string) error {
 	switch name {
-	case program.EdgeAuthor:
+	case diet.EdgeAuthor:
 		m.ClearAuthor()
 		return nil
 	}
-	return fmt.Errorf("unknown Program unique edge %s", name)
+	return fmt.Errorf("unknown Diet unique edge %s", name)
 }
 
 // ResetEdge resets all changes in the mutation regarding the
 // given edge name. It returns an error if the edge is not
 // defined in the schema.
-func (m *ProgramMutation) ResetEdge(name string) error {
+func (m *DietMutation) ResetEdge(name string) error {
 	switch name {
-	case program.EdgeAuthor:
+	case diet.EdgeAuthor:
 		m.ResetAuthor()
 		return nil
-	case program.EdgeWorkouts:
-		m.ResetWorkouts()
-		return nil
 	}
-	return fmt.Errorf("unknown Program edge %s", name)
-}
-
-// ShoutMutation represents an operation that mutate the Shouts
-// nodes in the graph.
-type ShoutMutation struct {
-	config
-	op              Op
-	typ             string
-	id              *int
-	created_at      *time.Time
-	updated_at      *time.Time
-	message         *string
-	likes           *int
-	addlikes        *int
-	clearedFields   map[string]struct{}
-	author          *int
-	clearedauthor   bool
-	liked_by        map[int]struct{}
-	removedliked_by map[int]struct{}
-	clearedliked_by bool
-	done            bool
-	oldValue        func(context.Context) (*Shout, error)
-}
-
-var _ ent.Mutation = (*ShoutMutation)(nil)
-
-// shoutOption allows to manage the mutation configuration using functional options.
-type shoutOption func(*ShoutMutation)
-
-// newShoutMutation creates new mutation for $n.Name.
-func newShoutMutation(c config, op Op, opts ...shoutOption) *ShoutMutation {
-	m := &ShoutMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeShout,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withShoutID sets the id field of the mutation.
-func withShoutID(id int) shoutOption {
-	return func(m *ShoutMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Shout
-		)
-		m.oldValue = func(ctx context.Context) (*Shout, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Shout.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withShout sets the old Shout of the mutation.
-func withShout(node *Shout) shoutOption {
-	return func(m *ShoutMutation) {
-		m.oldValue = func(context.Context) (*Shout, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m ShoutMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m ShoutMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the id value in the mutation. Note that, the id
-// is available only if it was provided to the builder.
-func (m *ShoutMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetCreatedAt sets the created_at field.
-func (m *ShoutMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the created_at value in the mutation.
-func (m *ShoutMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old created_at value of the Shout.
-// If the Shout object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *ShoutMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt reset all changes of the "created_at" field.
-func (m *ShoutMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the updated_at field.
-func (m *ShoutMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the updated_at value in the mutation.
-func (m *ShoutMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old updated_at value of the Shout.
-// If the Shout object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *ShoutMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt reset all changes of the "updated_at" field.
-func (m *ShoutMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetMessage sets the message field.
-func (m *ShoutMutation) SetMessage(s string) {
-	m.message = &s
-}
-
-// Message returns the message value in the mutation.
-func (m *ShoutMutation) Message() (r string, exists bool) {
-	v := m.message
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldMessage returns the old message value of the Shout.
-// If the Shout object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *ShoutMutation) OldMessage(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldMessage is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldMessage requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldMessage: %w", err)
-	}
-	return oldValue.Message, nil
-}
-
-// ResetMessage reset all changes of the "message" field.
-func (m *ShoutMutation) ResetMessage() {
-	m.message = nil
-}
-
-// SetLikes sets the likes field.
-func (m *ShoutMutation) SetLikes(i int) {
-	m.likes = &i
-	m.addlikes = nil
-}
-
-// Likes returns the likes value in the mutation.
-func (m *ShoutMutation) Likes() (r int, exists bool) {
-	v := m.likes
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldLikes returns the old likes value of the Shout.
-// If the Shout object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *ShoutMutation) OldLikes(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldLikes is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldLikes requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldLikes: %w", err)
-	}
-	return oldValue.Likes, nil
-}
-
-// AddLikes adds i to likes.
-func (m *ShoutMutation) AddLikes(i int) {
-	if m.addlikes != nil {
-		*m.addlikes += i
-	} else {
-		m.addlikes = &i
-	}
-}
-
-// AddedLikes returns the value that was added to the likes field in this mutation.
-func (m *ShoutMutation) AddedLikes() (r int, exists bool) {
-	v := m.addlikes
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetLikes reset all changes of the "likes" field.
-func (m *ShoutMutation) ResetLikes() {
-	m.likes = nil
-	m.addlikes = nil
-}
-
-// SetAuthorID sets the author edge to User by id.
-func (m *ShoutMutation) SetAuthorID(id int) {
-	m.author = &id
-}
-
-// ClearAuthor clears the author edge to User.
-func (m *ShoutMutation) ClearAuthor() {
-	m.clearedauthor = true
-}
-
-// AuthorCleared returns if the edge author was cleared.
-func (m *ShoutMutation) AuthorCleared() bool {
-	return m.clearedauthor
-}
-
-// AuthorID returns the author id in the mutation.
-func (m *ShoutMutation) AuthorID() (id int, exists bool) {
-	if m.author != nil {
-		return *m.author, true
-	}
-	return
-}
-
-// AuthorIDs returns the author ids in the mutation.
-// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
-// AuthorID instead. It exists only for internal usage by the builders.
-func (m *ShoutMutation) AuthorIDs() (ids []int) {
-	if id := m.author; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetAuthor reset all changes of the "author" edge.
-func (m *ShoutMutation) ResetAuthor() {
-	m.author = nil
-	m.clearedauthor = false
-}
-
-// AddLikedByIDs adds the liked_by edge to User by ids.
-func (m *ShoutMutation) AddLikedByIDs(ids ...int) {
-	if m.liked_by == nil {
-		m.liked_by = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.liked_by[ids[i]] = struct{}{}
-	}
-}
-
-// ClearLikedBy clears the liked_by edge to User.
-func (m *ShoutMutation) ClearLikedBy() {
-	m.clearedliked_by = true
-}
-
-// LikedByCleared returns if the edge liked_by was cleared.
-func (m *ShoutMutation) LikedByCleared() bool {
-	return m.clearedliked_by
-}
-
-// RemoveLikedByIDs removes the liked_by edge to User by ids.
-func (m *ShoutMutation) RemoveLikedByIDs(ids ...int) {
-	if m.removedliked_by == nil {
-		m.removedliked_by = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedliked_by[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedLikedBy returns the removed ids of liked_by.
-func (m *ShoutMutation) RemovedLikedByIDs() (ids []int) {
-	for id := range m.removedliked_by {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// LikedByIDs returns the liked_by ids in the mutation.
-func (m *ShoutMutation) LikedByIDs() (ids []int) {
-	for id := range m.liked_by {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetLikedBy reset all changes of the "liked_by" edge.
-func (m *ShoutMutation) ResetLikedBy() {
-	m.liked_by = nil
-	m.clearedliked_by = false
-	m.removedliked_by = nil
-}
-
-// Op returns the operation name.
-func (m *ShoutMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (Shout).
-func (m *ShoutMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during
-// this mutation. Note that, in order to get all numeric
-// fields that were in/decremented, call AddedFields().
-func (m *ShoutMutation) Fields() []string {
-	fields := make([]string, 0, 4)
-	if m.created_at != nil {
-		fields = append(fields, shout.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, shout.FieldUpdatedAt)
-	}
-	if m.message != nil {
-		fields = append(fields, shout.FieldMessage)
-	}
-	if m.likes != nil {
-		fields = append(fields, shout.FieldLikes)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name.
-// The second boolean value indicates that this field was
-// not set, or was not define in the schema.
-func (m *ShoutMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case shout.FieldCreatedAt:
-		return m.CreatedAt()
-	case shout.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case shout.FieldMessage:
-		return m.Message()
-	case shout.FieldLikes:
-		return m.Likes()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database.
-// An error is returned if the mutation operation is not UpdateOne,
-// or the query to the database was failed.
-func (m *ShoutMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case shout.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case shout.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case shout.FieldMessage:
-		return m.OldMessage(ctx)
-	case shout.FieldLikes:
-		return m.OldLikes(ctx)
-	}
-	return nil, fmt.Errorf("unknown Shout field %s", name)
-}
-
-// SetField sets the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
-func (m *ShoutMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case shout.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case shout.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case shout.FieldMessage:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetMessage(v)
-		return nil
-	case shout.FieldLikes:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetLikes(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Shout field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented
-// or decremented during this mutation.
-func (m *ShoutMutation) AddedFields() []string {
-	var fields []string
-	if m.addlikes != nil {
-		fields = append(fields, shout.FieldLikes)
-	}
-	return fields
-}
-
-// AddedField returns the numeric value that was in/decremented
-// from a field with the given name. The second value indicates
-// that this field was not set, or was not define in the schema.
-func (m *ShoutMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case shout.FieldLikes:
-		return m.AddedLikes()
-	}
-	return nil, false
-}
-
-// AddField adds the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
-func (m *ShoutMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	case shout.FieldLikes:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddLikes(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Shout numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared
-// during this mutation.
-func (m *ShoutMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicates if this field was
-// cleared in this mutation.
-func (m *ShoutMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value for the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *ShoutMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Shout nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation regarding the
-// given field name. It returns an error if the field is not
-// defined in the schema.
-func (m *ShoutMutation) ResetField(name string) error {
-	switch name {
-	case shout.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case shout.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case shout.FieldMessage:
-		m.ResetMessage()
-		return nil
-	case shout.FieldLikes:
-		m.ResetLikes()
-		return nil
-	}
-	return fmt.Errorf("unknown Shout field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this
-// mutation.
-func (m *ShoutMutation) AddedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.author != nil {
-		edges = append(edges, shout.EdgeAuthor)
-	}
-	if m.liked_by != nil {
-		edges = append(edges, shout.EdgeLikedBy)
-	}
-	return edges
-}
-
-// AddedIDs returns all ids (to other nodes) that were added for
-// the given edge name.
-func (m *ShoutMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case shout.EdgeAuthor:
-		if id := m.author; id != nil {
-			return []ent.Value{*id}
-		}
-	case shout.EdgeLikedBy:
-		ids := make([]ent.Value, 0, len(m.liked_by))
-		for id := range m.liked_by {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this
-// mutation.
-func (m *ShoutMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.removedliked_by != nil {
-		edges = append(edges, shout.EdgeLikedBy)
-	}
-	return edges
-}
-
-// RemovedIDs returns all ids (to other nodes) that were removed for
-// the given edge name.
-func (m *ShoutMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	case shout.EdgeLikedBy:
-		ids := make([]ent.Value, 0, len(m.removedliked_by))
-		for id := range m.removedliked_by {
-			ids = append(ids, id)
-		}
-		return ids
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this
-// mutation.
-func (m *ShoutMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 2)
-	if m.clearedauthor {
-		edges = append(edges, shout.EdgeAuthor)
-	}
-	if m.clearedliked_by {
-		edges = append(edges, shout.EdgeLikedBy)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean indicates if this edge was
-// cleared in this mutation.
-func (m *ShoutMutation) EdgeCleared(name string) bool {
-	switch name {
-	case shout.EdgeAuthor:
-		return m.clearedauthor
-	case shout.EdgeLikedBy:
-		return m.clearedliked_by
-	}
-	return false
-}
-
-// ClearEdge clears the value for the given name. It returns an
-// error if the edge name is not defined in the schema.
-func (m *ShoutMutation) ClearEdge(name string) error {
-	switch name {
-	case shout.EdgeAuthor:
-		m.ClearAuthor()
-		return nil
-	}
-	return fmt.Errorf("unknown Shout unique edge %s", name)
-}
-
-// ResetEdge resets all changes in the mutation regarding the
-// given edge name. It returns an error if the edge is not
-// defined in the schema.
-func (m *ShoutMutation) ResetEdge(name string) error {
-	switch name {
-	case shout.EdgeAuthor:
-		m.ResetAuthor()
-		return nil
-	case shout.EdgeLikedBy:
-		m.ResetLikedBy()
-		return nil
-	}
-	return fmt.Errorf("unknown Shout edge %s", name)
+	return fmt.Errorf("unknown Diet edge %s", name)
 }
 
 // UserMutation represents an operation that mutate the Users
 // nodes in the graph.
 type UserMutation struct {
 	config
-	op                  Op
-	typ                 string
-	id                  *int
-	created_at          *time.Time
-	updated_at          *time.Time
-	username            *string
-	email               *string
-	password            *string
-	follows_count       *int
-	addfollows_count    *int
-	followers_count     *int
-	addfollowers_count  *int
-	shouts_count        *int
-	addshouts_count     *int
-	clearedFields       map[string]struct{}
-	followers           map[int]struct{}
-	removedfollowers    map[int]struct{}
-	clearedfollowers    bool
-	following           map[int]struct{}
-	removedfollowing    map[int]struct{}
-	clearedfollowing    bool
-	programs            map[int]struct{}
-	removedprograms     map[int]struct{}
-	clearedprograms     bool
-	shouts              map[int]struct{}
-	removedshouts       map[int]struct{}
-	clearedshouts       bool
-	liked_shouts        map[int]struct{}
-	removedliked_shouts map[int]struct{}
-	clearedliked_shouts bool
-	settings            *int
-	clearedsettings     bool
-	done                bool
-	oldValue            func(context.Context) (*User, error)
+	op              Op
+	typ             string
+	id              *int
+	created_at      *time.Time
+	updated_at      *time.Time
+	username        *string
+	email           *string
+	password        *string
+	clearedFields   map[string]struct{}
+	settings        *int
+	clearedsettings bool
+	diets           map[int]struct{}
+	removeddiets    map[int]struct{}
+	cleareddiets    bool
+	done            bool
+	oldValue        func(context.Context) (*User, error)
 }
 
 var _ ent.Mutation = (*UserMutation)(nil)
@@ -1767,442 +966,6 @@ func (m *UserMutation) ResetPassword() {
 	m.password = nil
 }
 
-// SetFollowsCount sets the follows_count field.
-func (m *UserMutation) SetFollowsCount(i int) {
-	m.follows_count = &i
-	m.addfollows_count = nil
-}
-
-// FollowsCount returns the follows_count value in the mutation.
-func (m *UserMutation) FollowsCount() (r int, exists bool) {
-	v := m.follows_count
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFollowsCount returns the old follows_count value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *UserMutation) OldFollowsCount(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldFollowsCount is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldFollowsCount requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFollowsCount: %w", err)
-	}
-	return oldValue.FollowsCount, nil
-}
-
-// AddFollowsCount adds i to follows_count.
-func (m *UserMutation) AddFollowsCount(i int) {
-	if m.addfollows_count != nil {
-		*m.addfollows_count += i
-	} else {
-		m.addfollows_count = &i
-	}
-}
-
-// AddedFollowsCount returns the value that was added to the follows_count field in this mutation.
-func (m *UserMutation) AddedFollowsCount() (r int, exists bool) {
-	v := m.addfollows_count
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetFollowsCount reset all changes of the "follows_count" field.
-func (m *UserMutation) ResetFollowsCount() {
-	m.follows_count = nil
-	m.addfollows_count = nil
-}
-
-// SetFollowersCount sets the followers_count field.
-func (m *UserMutation) SetFollowersCount(i int) {
-	m.followers_count = &i
-	m.addfollowers_count = nil
-}
-
-// FollowersCount returns the followers_count value in the mutation.
-func (m *UserMutation) FollowersCount() (r int, exists bool) {
-	v := m.followers_count
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldFollowersCount returns the old followers_count value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *UserMutation) OldFollowersCount(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldFollowersCount is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldFollowersCount requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldFollowersCount: %w", err)
-	}
-	return oldValue.FollowersCount, nil
-}
-
-// AddFollowersCount adds i to followers_count.
-func (m *UserMutation) AddFollowersCount(i int) {
-	if m.addfollowers_count != nil {
-		*m.addfollowers_count += i
-	} else {
-		m.addfollowers_count = &i
-	}
-}
-
-// AddedFollowersCount returns the value that was added to the followers_count field in this mutation.
-func (m *UserMutation) AddedFollowersCount() (r int, exists bool) {
-	v := m.addfollowers_count
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetFollowersCount reset all changes of the "followers_count" field.
-func (m *UserMutation) ResetFollowersCount() {
-	m.followers_count = nil
-	m.addfollowers_count = nil
-}
-
-// SetShoutsCount sets the shouts_count field.
-func (m *UserMutation) SetShoutsCount(i int) {
-	m.shouts_count = &i
-	m.addshouts_count = nil
-}
-
-// ShoutsCount returns the shouts_count value in the mutation.
-func (m *UserMutation) ShoutsCount() (r int, exists bool) {
-	v := m.shouts_count
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldShoutsCount returns the old shouts_count value of the User.
-// If the User object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *UserMutation) OldShoutsCount(ctx context.Context) (v int, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldShoutsCount is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldShoutsCount requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldShoutsCount: %w", err)
-	}
-	return oldValue.ShoutsCount, nil
-}
-
-// AddShoutsCount adds i to shouts_count.
-func (m *UserMutation) AddShoutsCount(i int) {
-	if m.addshouts_count != nil {
-		*m.addshouts_count += i
-	} else {
-		m.addshouts_count = &i
-	}
-}
-
-// AddedShoutsCount returns the value that was added to the shouts_count field in this mutation.
-func (m *UserMutation) AddedShoutsCount() (r int, exists bool) {
-	v := m.addshouts_count
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// ResetShoutsCount reset all changes of the "shouts_count" field.
-func (m *UserMutation) ResetShoutsCount() {
-	m.shouts_count = nil
-	m.addshouts_count = nil
-}
-
-// AddFollowerIDs adds the followers edge to User by ids.
-func (m *UserMutation) AddFollowerIDs(ids ...int) {
-	if m.followers == nil {
-		m.followers = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.followers[ids[i]] = struct{}{}
-	}
-}
-
-// ClearFollowers clears the followers edge to User.
-func (m *UserMutation) ClearFollowers() {
-	m.clearedfollowers = true
-}
-
-// FollowersCleared returns if the edge followers was cleared.
-func (m *UserMutation) FollowersCleared() bool {
-	return m.clearedfollowers
-}
-
-// RemoveFollowerIDs removes the followers edge to User by ids.
-func (m *UserMutation) RemoveFollowerIDs(ids ...int) {
-	if m.removedfollowers == nil {
-		m.removedfollowers = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedfollowers[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedFollowers returns the removed ids of followers.
-func (m *UserMutation) RemovedFollowersIDs() (ids []int) {
-	for id := range m.removedfollowers {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// FollowersIDs returns the followers ids in the mutation.
-func (m *UserMutation) FollowersIDs() (ids []int) {
-	for id := range m.followers {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetFollowers reset all changes of the "followers" edge.
-func (m *UserMutation) ResetFollowers() {
-	m.followers = nil
-	m.clearedfollowers = false
-	m.removedfollowers = nil
-}
-
-// AddFollowingIDs adds the following edge to User by ids.
-func (m *UserMutation) AddFollowingIDs(ids ...int) {
-	if m.following == nil {
-		m.following = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.following[ids[i]] = struct{}{}
-	}
-}
-
-// ClearFollowing clears the following edge to User.
-func (m *UserMutation) ClearFollowing() {
-	m.clearedfollowing = true
-}
-
-// FollowingCleared returns if the edge following was cleared.
-func (m *UserMutation) FollowingCleared() bool {
-	return m.clearedfollowing
-}
-
-// RemoveFollowingIDs removes the following edge to User by ids.
-func (m *UserMutation) RemoveFollowingIDs(ids ...int) {
-	if m.removedfollowing == nil {
-		m.removedfollowing = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedfollowing[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedFollowing returns the removed ids of following.
-func (m *UserMutation) RemovedFollowingIDs() (ids []int) {
-	for id := range m.removedfollowing {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// FollowingIDs returns the following ids in the mutation.
-func (m *UserMutation) FollowingIDs() (ids []int) {
-	for id := range m.following {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetFollowing reset all changes of the "following" edge.
-func (m *UserMutation) ResetFollowing() {
-	m.following = nil
-	m.clearedfollowing = false
-	m.removedfollowing = nil
-}
-
-// AddProgramIDs adds the programs edge to Program by ids.
-func (m *UserMutation) AddProgramIDs(ids ...int) {
-	if m.programs == nil {
-		m.programs = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.programs[ids[i]] = struct{}{}
-	}
-}
-
-// ClearPrograms clears the programs edge to Program.
-func (m *UserMutation) ClearPrograms() {
-	m.clearedprograms = true
-}
-
-// ProgramsCleared returns if the edge programs was cleared.
-func (m *UserMutation) ProgramsCleared() bool {
-	return m.clearedprograms
-}
-
-// RemoveProgramIDs removes the programs edge to Program by ids.
-func (m *UserMutation) RemoveProgramIDs(ids ...int) {
-	if m.removedprograms == nil {
-		m.removedprograms = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedprograms[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedPrograms returns the removed ids of programs.
-func (m *UserMutation) RemovedProgramsIDs() (ids []int) {
-	for id := range m.removedprograms {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ProgramsIDs returns the programs ids in the mutation.
-func (m *UserMutation) ProgramsIDs() (ids []int) {
-	for id := range m.programs {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetPrograms reset all changes of the "programs" edge.
-func (m *UserMutation) ResetPrograms() {
-	m.programs = nil
-	m.clearedprograms = false
-	m.removedprograms = nil
-}
-
-// AddShoutIDs adds the shouts edge to Shout by ids.
-func (m *UserMutation) AddShoutIDs(ids ...int) {
-	if m.shouts == nil {
-		m.shouts = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.shouts[ids[i]] = struct{}{}
-	}
-}
-
-// ClearShouts clears the shouts edge to Shout.
-func (m *UserMutation) ClearShouts() {
-	m.clearedshouts = true
-}
-
-// ShoutsCleared returns if the edge shouts was cleared.
-func (m *UserMutation) ShoutsCleared() bool {
-	return m.clearedshouts
-}
-
-// RemoveShoutIDs removes the shouts edge to Shout by ids.
-func (m *UserMutation) RemoveShoutIDs(ids ...int) {
-	if m.removedshouts == nil {
-		m.removedshouts = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedshouts[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedShouts returns the removed ids of shouts.
-func (m *UserMutation) RemovedShoutsIDs() (ids []int) {
-	for id := range m.removedshouts {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ShoutsIDs returns the shouts ids in the mutation.
-func (m *UserMutation) ShoutsIDs() (ids []int) {
-	for id := range m.shouts {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetShouts reset all changes of the "shouts" edge.
-func (m *UserMutation) ResetShouts() {
-	m.shouts = nil
-	m.clearedshouts = false
-	m.removedshouts = nil
-}
-
-// AddLikedShoutIDs adds the liked_shouts edge to Shout by ids.
-func (m *UserMutation) AddLikedShoutIDs(ids ...int) {
-	if m.liked_shouts == nil {
-		m.liked_shouts = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.liked_shouts[ids[i]] = struct{}{}
-	}
-}
-
-// ClearLikedShouts clears the liked_shouts edge to Shout.
-func (m *UserMutation) ClearLikedShouts() {
-	m.clearedliked_shouts = true
-}
-
-// LikedShoutsCleared returns if the edge liked_shouts was cleared.
-func (m *UserMutation) LikedShoutsCleared() bool {
-	return m.clearedliked_shouts
-}
-
-// RemoveLikedShoutIDs removes the liked_shouts edge to Shout by ids.
-func (m *UserMutation) RemoveLikedShoutIDs(ids ...int) {
-	if m.removedliked_shouts == nil {
-		m.removedliked_shouts = make(map[int]struct{})
-	}
-	for i := range ids {
-		m.removedliked_shouts[ids[i]] = struct{}{}
-	}
-}
-
-// RemovedLikedShouts returns the removed ids of liked_shouts.
-func (m *UserMutation) RemovedLikedShoutsIDs() (ids []int) {
-	for id := range m.removedliked_shouts {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// LikedShoutsIDs returns the liked_shouts ids in the mutation.
-func (m *UserMutation) LikedShoutsIDs() (ids []int) {
-	for id := range m.liked_shouts {
-		ids = append(ids, id)
-	}
-	return
-}
-
-// ResetLikedShouts reset all changes of the "liked_shouts" edge.
-func (m *UserMutation) ResetLikedShouts() {
-	m.liked_shouts = nil
-	m.clearedliked_shouts = false
-	m.removedliked_shouts = nil
-}
-
 // SetSettingsID sets the settings edge to UserSettings by id.
 func (m *UserMutation) SetSettingsID(id int) {
 	m.settings = &id
@@ -2242,6 +1005,59 @@ func (m *UserMutation) ResetSettings() {
 	m.clearedsettings = false
 }
 
+// AddDietIDs adds the diets edge to Diet by ids.
+func (m *UserMutation) AddDietIDs(ids ...int) {
+	if m.diets == nil {
+		m.diets = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.diets[ids[i]] = struct{}{}
+	}
+}
+
+// ClearDiets clears the diets edge to Diet.
+func (m *UserMutation) ClearDiets() {
+	m.cleareddiets = true
+}
+
+// DietsCleared returns if the edge diets was cleared.
+func (m *UserMutation) DietsCleared() bool {
+	return m.cleareddiets
+}
+
+// RemoveDietIDs removes the diets edge to Diet by ids.
+func (m *UserMutation) RemoveDietIDs(ids ...int) {
+	if m.removeddiets == nil {
+		m.removeddiets = make(map[int]struct{})
+	}
+	for i := range ids {
+		m.removeddiets[ids[i]] = struct{}{}
+	}
+}
+
+// RemovedDiets returns the removed ids of diets.
+func (m *UserMutation) RemovedDietsIDs() (ids []int) {
+	for id := range m.removeddiets {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// DietsIDs returns the diets ids in the mutation.
+func (m *UserMutation) DietsIDs() (ids []int) {
+	for id := range m.diets {
+		ids = append(ids, id)
+	}
+	return
+}
+
+// ResetDiets reset all changes of the "diets" edge.
+func (m *UserMutation) ResetDiets() {
+	m.diets = nil
+	m.cleareddiets = false
+	m.removeddiets = nil
+}
+
 // Op returns the operation name.
 func (m *UserMutation) Op() Op {
 	return m.op
@@ -2256,7 +1072,7 @@ func (m *UserMutation) Type() string {
 // this mutation. Note that, in order to get all numeric
 // fields that were in/decremented, call AddedFields().
 func (m *UserMutation) Fields() []string {
-	fields := make([]string, 0, 8)
+	fields := make([]string, 0, 5)
 	if m.created_at != nil {
 		fields = append(fields, user.FieldCreatedAt)
 	}
@@ -2271,15 +1087,6 @@ func (m *UserMutation) Fields() []string {
 	}
 	if m.password != nil {
 		fields = append(fields, user.FieldPassword)
-	}
-	if m.follows_count != nil {
-		fields = append(fields, user.FieldFollowsCount)
-	}
-	if m.followers_count != nil {
-		fields = append(fields, user.FieldFollowersCount)
-	}
-	if m.shouts_count != nil {
-		fields = append(fields, user.FieldShoutsCount)
 	}
 	return fields
 }
@@ -2299,12 +1106,6 @@ func (m *UserMutation) Field(name string) (ent.Value, bool) {
 		return m.Email()
 	case user.FieldPassword:
 		return m.Password()
-	case user.FieldFollowsCount:
-		return m.FollowsCount()
-	case user.FieldFollowersCount:
-		return m.FollowersCount()
-	case user.FieldShoutsCount:
-		return m.ShoutsCount()
 	}
 	return nil, false
 }
@@ -2324,12 +1125,6 @@ func (m *UserMutation) OldField(ctx context.Context, name string) (ent.Value, er
 		return m.OldEmail(ctx)
 	case user.FieldPassword:
 		return m.OldPassword(ctx)
-	case user.FieldFollowsCount:
-		return m.OldFollowsCount(ctx)
-	case user.FieldFollowersCount:
-		return m.OldFollowersCount(ctx)
-	case user.FieldShoutsCount:
-		return m.OldShoutsCount(ctx)
 	}
 	return nil, fmt.Errorf("unknown User field %s", name)
 }
@@ -2374,27 +1169,6 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 		}
 		m.SetPassword(v)
 		return nil
-	case user.FieldFollowsCount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFollowsCount(v)
-		return nil
-	case user.FieldFollowersCount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetFollowersCount(v)
-		return nil
-	case user.FieldShoutsCount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetShoutsCount(v)
-		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -2402,31 +1176,13 @@ func (m *UserMutation) SetField(name string, value ent.Value) error {
 // AddedFields returns all numeric fields that were incremented
 // or decremented during this mutation.
 func (m *UserMutation) AddedFields() []string {
-	var fields []string
-	if m.addfollows_count != nil {
-		fields = append(fields, user.FieldFollowsCount)
-	}
-	if m.addfollowers_count != nil {
-		fields = append(fields, user.FieldFollowersCount)
-	}
-	if m.addshouts_count != nil {
-		fields = append(fields, user.FieldShoutsCount)
-	}
-	return fields
+	return nil
 }
 
 // AddedField returns the numeric value that was in/decremented
 // from a field with the given name. The second value indicates
 // that this field was not set, or was not define in the schema.
 func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
-	switch name {
-	case user.FieldFollowsCount:
-		return m.AddedFollowsCount()
-	case user.FieldFollowersCount:
-		return m.AddedFollowersCount()
-	case user.FieldShoutsCount:
-		return m.AddedShoutsCount()
-	}
 	return nil, false
 }
 
@@ -2435,27 +1191,6 @@ func (m *UserMutation) AddedField(name string) (ent.Value, bool) {
 // type mismatch the field type.
 func (m *UserMutation) AddField(name string, value ent.Value) error {
 	switch name {
-	case user.FieldFollowsCount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddFollowsCount(v)
-		return nil
-	case user.FieldFollowersCount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddFollowersCount(v)
-		return nil
-	case user.FieldShoutsCount:
-		v, ok := value.(int)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.AddShoutsCount(v)
-		return nil
 	}
 	return fmt.Errorf("unknown User numeric field %s", name)
 }
@@ -2499,15 +1234,6 @@ func (m *UserMutation) ResetField(name string) error {
 	case user.FieldPassword:
 		m.ResetPassword()
 		return nil
-	case user.FieldFollowsCount:
-		m.ResetFollowsCount()
-		return nil
-	case user.FieldFollowersCount:
-		m.ResetFollowersCount()
-		return nil
-	case user.FieldShoutsCount:
-		m.ResetShoutsCount()
-		return nil
 	}
 	return fmt.Errorf("unknown User field %s", name)
 }
@@ -2515,24 +1241,12 @@ func (m *UserMutation) ResetField(name string) error {
 // AddedEdges returns all edge names that were set/added in this
 // mutation.
 func (m *UserMutation) AddedEdges() []string {
-	edges := make([]string, 0, 6)
-	if m.followers != nil {
-		edges = append(edges, user.EdgeFollowers)
-	}
-	if m.following != nil {
-		edges = append(edges, user.EdgeFollowing)
-	}
-	if m.programs != nil {
-		edges = append(edges, user.EdgePrograms)
-	}
-	if m.shouts != nil {
-		edges = append(edges, user.EdgeShouts)
-	}
-	if m.liked_shouts != nil {
-		edges = append(edges, user.EdgeLikedShouts)
-	}
+	edges := make([]string, 0, 2)
 	if m.settings != nil {
 		edges = append(edges, user.EdgeSettings)
+	}
+	if m.diets != nil {
+		edges = append(edges, user.EdgeDiets)
 	}
 	return edges
 }
@@ -2541,40 +1255,16 @@ func (m *UserMutation) AddedEdges() []string {
 // the given edge name.
 func (m *UserMutation) AddedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeFollowers:
-		ids := make([]ent.Value, 0, len(m.followers))
-		for id := range m.followers {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgeFollowing:
-		ids := make([]ent.Value, 0, len(m.following))
-		for id := range m.following {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgePrograms:
-		ids := make([]ent.Value, 0, len(m.programs))
-		for id := range m.programs {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgeShouts:
-		ids := make([]ent.Value, 0, len(m.shouts))
-		for id := range m.shouts {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgeLikedShouts:
-		ids := make([]ent.Value, 0, len(m.liked_shouts))
-		for id := range m.liked_shouts {
-			ids = append(ids, id)
-		}
-		return ids
 	case user.EdgeSettings:
 		if id := m.settings; id != nil {
 			return []ent.Value{*id}
 		}
+	case user.EdgeDiets:
+		ids := make([]ent.Value, 0, len(m.diets))
+		for id := range m.diets {
+			ids = append(ids, id)
+		}
+		return ids
 	}
 	return nil
 }
@@ -2582,21 +1272,9 @@ func (m *UserMutation) AddedIDs(name string) []ent.Value {
 // RemovedEdges returns all edge names that were removed in this
 // mutation.
 func (m *UserMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 6)
-	if m.removedfollowers != nil {
-		edges = append(edges, user.EdgeFollowers)
-	}
-	if m.removedfollowing != nil {
-		edges = append(edges, user.EdgeFollowing)
-	}
-	if m.removedprograms != nil {
-		edges = append(edges, user.EdgePrograms)
-	}
-	if m.removedshouts != nil {
-		edges = append(edges, user.EdgeShouts)
-	}
-	if m.removedliked_shouts != nil {
-		edges = append(edges, user.EdgeLikedShouts)
+	edges := make([]string, 0, 2)
+	if m.removeddiets != nil {
+		edges = append(edges, user.EdgeDiets)
 	}
 	return edges
 }
@@ -2605,33 +1283,9 @@ func (m *UserMutation) RemovedEdges() []string {
 // the given edge name.
 func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 	switch name {
-	case user.EdgeFollowers:
-		ids := make([]ent.Value, 0, len(m.removedfollowers))
-		for id := range m.removedfollowers {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgeFollowing:
-		ids := make([]ent.Value, 0, len(m.removedfollowing))
-		for id := range m.removedfollowing {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgePrograms:
-		ids := make([]ent.Value, 0, len(m.removedprograms))
-		for id := range m.removedprograms {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgeShouts:
-		ids := make([]ent.Value, 0, len(m.removedshouts))
-		for id := range m.removedshouts {
-			ids = append(ids, id)
-		}
-		return ids
-	case user.EdgeLikedShouts:
-		ids := make([]ent.Value, 0, len(m.removedliked_shouts))
-		for id := range m.removedliked_shouts {
+	case user.EdgeDiets:
+		ids := make([]ent.Value, 0, len(m.removeddiets))
+		for id := range m.removeddiets {
 			ids = append(ids, id)
 		}
 		return ids
@@ -2642,24 +1296,12 @@ func (m *UserMutation) RemovedIDs(name string) []ent.Value {
 // ClearedEdges returns all edge names that were cleared in this
 // mutation.
 func (m *UserMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 6)
-	if m.clearedfollowers {
-		edges = append(edges, user.EdgeFollowers)
-	}
-	if m.clearedfollowing {
-		edges = append(edges, user.EdgeFollowing)
-	}
-	if m.clearedprograms {
-		edges = append(edges, user.EdgePrograms)
-	}
-	if m.clearedshouts {
-		edges = append(edges, user.EdgeShouts)
-	}
-	if m.clearedliked_shouts {
-		edges = append(edges, user.EdgeLikedShouts)
-	}
+	edges := make([]string, 0, 2)
 	if m.clearedsettings {
 		edges = append(edges, user.EdgeSettings)
+	}
+	if m.cleareddiets {
+		edges = append(edges, user.EdgeDiets)
 	}
 	return edges
 }
@@ -2668,18 +1310,10 @@ func (m *UserMutation) ClearedEdges() []string {
 // cleared in this mutation.
 func (m *UserMutation) EdgeCleared(name string) bool {
 	switch name {
-	case user.EdgeFollowers:
-		return m.clearedfollowers
-	case user.EdgeFollowing:
-		return m.clearedfollowing
-	case user.EdgePrograms:
-		return m.clearedprograms
-	case user.EdgeShouts:
-		return m.clearedshouts
-	case user.EdgeLikedShouts:
-		return m.clearedliked_shouts
 	case user.EdgeSettings:
 		return m.clearedsettings
+	case user.EdgeDiets:
+		return m.cleareddiets
 	}
 	return false
 }
@@ -2700,23 +1334,11 @@ func (m *UserMutation) ClearEdge(name string) error {
 // defined in the schema.
 func (m *UserMutation) ResetEdge(name string) error {
 	switch name {
-	case user.EdgeFollowers:
-		m.ResetFollowers()
-		return nil
-	case user.EdgeFollowing:
-		m.ResetFollowing()
-		return nil
-	case user.EdgePrograms:
-		m.ResetPrograms()
-		return nil
-	case user.EdgeShouts:
-		m.ResetShouts()
-		return nil
-	case user.EdgeLikedShouts:
-		m.ResetLikedShouts()
-		return nil
 	case user.EdgeSettings:
 		m.ResetSettings()
+		return nil
+	case user.EdgeDiets:
+		m.ResetDiets()
 		return nil
 	}
 	return fmt.Errorf("unknown User edge %s", name)
@@ -3486,476 +2108,4 @@ func (m *UserSettingsMutation) ResetEdge(name string) error {
 		return nil
 	}
 	return fmt.Errorf("unknown UserSettings edge %s", name)
-}
-
-// WorkoutMutation represents an operation that mutate the Workouts
-// nodes in the graph.
-type WorkoutMutation struct {
-	config
-	op             Op
-	typ            string
-	id             *int
-	created_at     *time.Time
-	updated_at     *time.Time
-	name           *string
-	clearedFields  map[string]struct{}
-	program        *int
-	clearedprogram bool
-	done           bool
-	oldValue       func(context.Context) (*Workout, error)
-}
-
-var _ ent.Mutation = (*WorkoutMutation)(nil)
-
-// workoutOption allows to manage the mutation configuration using functional options.
-type workoutOption func(*WorkoutMutation)
-
-// newWorkoutMutation creates new mutation for $n.Name.
-func newWorkoutMutation(c config, op Op, opts ...workoutOption) *WorkoutMutation {
-	m := &WorkoutMutation{
-		config:        c,
-		op:            op,
-		typ:           TypeWorkout,
-		clearedFields: make(map[string]struct{}),
-	}
-	for _, opt := range opts {
-		opt(m)
-	}
-	return m
-}
-
-// withWorkoutID sets the id field of the mutation.
-func withWorkoutID(id int) workoutOption {
-	return func(m *WorkoutMutation) {
-		var (
-			err   error
-			once  sync.Once
-			value *Workout
-		)
-		m.oldValue = func(ctx context.Context) (*Workout, error) {
-			once.Do(func() {
-				if m.done {
-					err = fmt.Errorf("querying old values post mutation is not allowed")
-				} else {
-					value, err = m.Client().Workout.Get(ctx, id)
-				}
-			})
-			return value, err
-		}
-		m.id = &id
-	}
-}
-
-// withWorkout sets the old Workout of the mutation.
-func withWorkout(node *Workout) workoutOption {
-	return func(m *WorkoutMutation) {
-		m.oldValue = func(context.Context) (*Workout, error) {
-			return node, nil
-		}
-		m.id = &node.ID
-	}
-}
-
-// Client returns a new `ent.Client` from the mutation. If the mutation was
-// executed in a transaction (ent.Tx), a transactional client is returned.
-func (m WorkoutMutation) Client() *Client {
-	client := &Client{config: m.config}
-	client.init()
-	return client
-}
-
-// Tx returns an `ent.Tx` for mutations that were executed in transactions;
-// it returns an error otherwise.
-func (m WorkoutMutation) Tx() (*Tx, error) {
-	if _, ok := m.driver.(*txDriver); !ok {
-		return nil, fmt.Errorf("ent: mutation is not running in a transaction")
-	}
-	tx := &Tx{config: m.config}
-	tx.init()
-	return tx, nil
-}
-
-// ID returns the id value in the mutation. Note that, the id
-// is available only if it was provided to the builder.
-func (m *WorkoutMutation) ID() (id int, exists bool) {
-	if m.id == nil {
-		return
-	}
-	return *m.id, true
-}
-
-// SetCreatedAt sets the created_at field.
-func (m *WorkoutMutation) SetCreatedAt(t time.Time) {
-	m.created_at = &t
-}
-
-// CreatedAt returns the created_at value in the mutation.
-func (m *WorkoutMutation) CreatedAt() (r time.Time, exists bool) {
-	v := m.created_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldCreatedAt returns the old created_at value of the Workout.
-// If the Workout object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *WorkoutMutation) OldCreatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldCreatedAt is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldCreatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldCreatedAt: %w", err)
-	}
-	return oldValue.CreatedAt, nil
-}
-
-// ResetCreatedAt reset all changes of the "created_at" field.
-func (m *WorkoutMutation) ResetCreatedAt() {
-	m.created_at = nil
-}
-
-// SetUpdatedAt sets the updated_at field.
-func (m *WorkoutMutation) SetUpdatedAt(t time.Time) {
-	m.updated_at = &t
-}
-
-// UpdatedAt returns the updated_at value in the mutation.
-func (m *WorkoutMutation) UpdatedAt() (r time.Time, exists bool) {
-	v := m.updated_at
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldUpdatedAt returns the old updated_at value of the Workout.
-// If the Workout object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *WorkoutMutation) OldUpdatedAt(ctx context.Context) (v time.Time, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldUpdatedAt is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldUpdatedAt requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldUpdatedAt: %w", err)
-	}
-	return oldValue.UpdatedAt, nil
-}
-
-// ResetUpdatedAt reset all changes of the "updated_at" field.
-func (m *WorkoutMutation) ResetUpdatedAt() {
-	m.updated_at = nil
-}
-
-// SetName sets the name field.
-func (m *WorkoutMutation) SetName(s string) {
-	m.name = &s
-}
-
-// Name returns the name value in the mutation.
-func (m *WorkoutMutation) Name() (r string, exists bool) {
-	v := m.name
-	if v == nil {
-		return
-	}
-	return *v, true
-}
-
-// OldName returns the old name value of the Workout.
-// If the Workout object wasn't provided to the builder, the object is fetched
-// from the database.
-// An error is returned if the mutation operation is not UpdateOne, or database query fails.
-func (m *WorkoutMutation) OldName(ctx context.Context) (v string, err error) {
-	if !m.op.Is(OpUpdateOne) {
-		return v, fmt.Errorf("OldName is allowed only on UpdateOne operations")
-	}
-	if m.id == nil || m.oldValue == nil {
-		return v, fmt.Errorf("OldName requires an ID field in the mutation")
-	}
-	oldValue, err := m.oldValue(ctx)
-	if err != nil {
-		return v, fmt.Errorf("querying old value for OldName: %w", err)
-	}
-	return oldValue.Name, nil
-}
-
-// ResetName reset all changes of the "name" field.
-func (m *WorkoutMutation) ResetName() {
-	m.name = nil
-}
-
-// SetProgramID sets the program edge to Program by id.
-func (m *WorkoutMutation) SetProgramID(id int) {
-	m.program = &id
-}
-
-// ClearProgram clears the program edge to Program.
-func (m *WorkoutMutation) ClearProgram() {
-	m.clearedprogram = true
-}
-
-// ProgramCleared returns if the edge program was cleared.
-func (m *WorkoutMutation) ProgramCleared() bool {
-	return m.clearedprogram
-}
-
-// ProgramID returns the program id in the mutation.
-func (m *WorkoutMutation) ProgramID() (id int, exists bool) {
-	if m.program != nil {
-		return *m.program, true
-	}
-	return
-}
-
-// ProgramIDs returns the program ids in the mutation.
-// Note that ids always returns len(ids) <= 1 for unique edges, and you should use
-// ProgramID instead. It exists only for internal usage by the builders.
-func (m *WorkoutMutation) ProgramIDs() (ids []int) {
-	if id := m.program; id != nil {
-		ids = append(ids, *id)
-	}
-	return
-}
-
-// ResetProgram reset all changes of the "program" edge.
-func (m *WorkoutMutation) ResetProgram() {
-	m.program = nil
-	m.clearedprogram = false
-}
-
-// Op returns the operation name.
-func (m *WorkoutMutation) Op() Op {
-	return m.op
-}
-
-// Type returns the node type of this mutation (Workout).
-func (m *WorkoutMutation) Type() string {
-	return m.typ
-}
-
-// Fields returns all fields that were changed during
-// this mutation. Note that, in order to get all numeric
-// fields that were in/decremented, call AddedFields().
-func (m *WorkoutMutation) Fields() []string {
-	fields := make([]string, 0, 3)
-	if m.created_at != nil {
-		fields = append(fields, workout.FieldCreatedAt)
-	}
-	if m.updated_at != nil {
-		fields = append(fields, workout.FieldUpdatedAt)
-	}
-	if m.name != nil {
-		fields = append(fields, workout.FieldName)
-	}
-	return fields
-}
-
-// Field returns the value of a field with the given name.
-// The second boolean value indicates that this field was
-// not set, or was not define in the schema.
-func (m *WorkoutMutation) Field(name string) (ent.Value, bool) {
-	switch name {
-	case workout.FieldCreatedAt:
-		return m.CreatedAt()
-	case workout.FieldUpdatedAt:
-		return m.UpdatedAt()
-	case workout.FieldName:
-		return m.Name()
-	}
-	return nil, false
-}
-
-// OldField returns the old value of the field from the database.
-// An error is returned if the mutation operation is not UpdateOne,
-// or the query to the database was failed.
-func (m *WorkoutMutation) OldField(ctx context.Context, name string) (ent.Value, error) {
-	switch name {
-	case workout.FieldCreatedAt:
-		return m.OldCreatedAt(ctx)
-	case workout.FieldUpdatedAt:
-		return m.OldUpdatedAt(ctx)
-	case workout.FieldName:
-		return m.OldName(ctx)
-	}
-	return nil, fmt.Errorf("unknown Workout field %s", name)
-}
-
-// SetField sets the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
-func (m *WorkoutMutation) SetField(name string, value ent.Value) error {
-	switch name {
-	case workout.FieldCreatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetCreatedAt(v)
-		return nil
-	case workout.FieldUpdatedAt:
-		v, ok := value.(time.Time)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetUpdatedAt(v)
-		return nil
-	case workout.FieldName:
-		v, ok := value.(string)
-		if !ok {
-			return fmt.Errorf("unexpected type %T for field %s", value, name)
-		}
-		m.SetName(v)
-		return nil
-	}
-	return fmt.Errorf("unknown Workout field %s", name)
-}
-
-// AddedFields returns all numeric fields that were incremented
-// or decremented during this mutation.
-func (m *WorkoutMutation) AddedFields() []string {
-	return nil
-}
-
-// AddedField returns the numeric value that was in/decremented
-// from a field with the given name. The second value indicates
-// that this field was not set, or was not define in the schema.
-func (m *WorkoutMutation) AddedField(name string) (ent.Value, bool) {
-	return nil, false
-}
-
-// AddField adds the value for the given name. It returns an
-// error if the field is not defined in the schema, or if the
-// type mismatch the field type.
-func (m *WorkoutMutation) AddField(name string, value ent.Value) error {
-	switch name {
-	}
-	return fmt.Errorf("unknown Workout numeric field %s", name)
-}
-
-// ClearedFields returns all nullable fields that were cleared
-// during this mutation.
-func (m *WorkoutMutation) ClearedFields() []string {
-	return nil
-}
-
-// FieldCleared returns a boolean indicates if this field was
-// cleared in this mutation.
-func (m *WorkoutMutation) FieldCleared(name string) bool {
-	_, ok := m.clearedFields[name]
-	return ok
-}
-
-// ClearField clears the value for the given name. It returns an
-// error if the field is not defined in the schema.
-func (m *WorkoutMutation) ClearField(name string) error {
-	return fmt.Errorf("unknown Workout nullable field %s", name)
-}
-
-// ResetField resets all changes in the mutation regarding the
-// given field name. It returns an error if the field is not
-// defined in the schema.
-func (m *WorkoutMutation) ResetField(name string) error {
-	switch name {
-	case workout.FieldCreatedAt:
-		m.ResetCreatedAt()
-		return nil
-	case workout.FieldUpdatedAt:
-		m.ResetUpdatedAt()
-		return nil
-	case workout.FieldName:
-		m.ResetName()
-		return nil
-	}
-	return fmt.Errorf("unknown Workout field %s", name)
-}
-
-// AddedEdges returns all edge names that were set/added in this
-// mutation.
-func (m *WorkoutMutation) AddedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.program != nil {
-		edges = append(edges, workout.EdgeProgram)
-	}
-	return edges
-}
-
-// AddedIDs returns all ids (to other nodes) that were added for
-// the given edge name.
-func (m *WorkoutMutation) AddedIDs(name string) []ent.Value {
-	switch name {
-	case workout.EdgeProgram:
-		if id := m.program; id != nil {
-			return []ent.Value{*id}
-		}
-	}
-	return nil
-}
-
-// RemovedEdges returns all edge names that were removed in this
-// mutation.
-func (m *WorkoutMutation) RemovedEdges() []string {
-	edges := make([]string, 0, 1)
-	return edges
-}
-
-// RemovedIDs returns all ids (to other nodes) that were removed for
-// the given edge name.
-func (m *WorkoutMutation) RemovedIDs(name string) []ent.Value {
-	switch name {
-	}
-	return nil
-}
-
-// ClearedEdges returns all edge names that were cleared in this
-// mutation.
-func (m *WorkoutMutation) ClearedEdges() []string {
-	edges := make([]string, 0, 1)
-	if m.clearedprogram {
-		edges = append(edges, workout.EdgeProgram)
-	}
-	return edges
-}
-
-// EdgeCleared returns a boolean indicates if this edge was
-// cleared in this mutation.
-func (m *WorkoutMutation) EdgeCleared(name string) bool {
-	switch name {
-	case workout.EdgeProgram:
-		return m.clearedprogram
-	}
-	return false
-}
-
-// ClearEdge clears the value for the given name. It returns an
-// error if the edge name is not defined in the schema.
-func (m *WorkoutMutation) ClearEdge(name string) error {
-	switch name {
-	case workout.EdgeProgram:
-		m.ClearProgram()
-		return nil
-	}
-	return fmt.Errorf("unknown Workout unique edge %s", name)
-}
-
-// ResetEdge resets all changes in the mutation regarding the
-// given edge name. It returns an error if the edge is not
-// defined in the schema.
-func (m *WorkoutMutation) ResetEdge(name string) error {
-	switch name {
-	case workout.EdgeProgram:
-		m.ResetProgram()
-		return nil
-	}
-	return fmt.Errorf("unknown Workout edge %s", name)
 }

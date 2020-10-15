@@ -38,26 +38,14 @@ func (User) Fields() []ent.Field {
 			Unique().
 			Validate(checkmail.ValidateFormat),
 		field.String("password"),
-
-		field.Int("follows_count").
-			Default(0),
-		field.Int("followers_count").
-			Default(0),
-		field.Int("shouts_count").
-			Default(0),
 	}
 }
 
 // Edges of the User.
 func (User) Edges() []ent.Edge {
 	return []ent.Edge{
-		edge.To("following", User.Type).
-			From("followers"),
-		edge.To("programs", Program.Type),
-		edge.To("shouts", Shout.Type),
-		edge.From("liked_shouts", Shout.Type).
-			Ref("liked_by"),
 		edge.To("settings", UserSettings.Type).
 			Unique(),
+		edge.To("diets", Diet.Type),
 	}
 }

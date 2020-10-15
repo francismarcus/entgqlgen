@@ -9,39 +9,15 @@ import (
 )
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (e *ExerciseQuery) CollectFields(ctx context.Context, satisfies ...string) *ExerciseQuery {
+func (d *DietQuery) CollectFields(ctx context.Context, satisfies ...string) *DietQuery {
 	if fc := graphql.GetFieldContext(ctx); fc != nil {
-		e = e.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
+		d = d.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
 	}
-	return e
+	return d
 }
 
-func (e *ExerciseQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *ExerciseQuery {
-	return e
-}
-
-// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (pr *ProgramQuery) CollectFields(ctx context.Context, satisfies ...string) *ProgramQuery {
-	if fc := graphql.GetFieldContext(ctx); fc != nil {
-		pr = pr.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
-	}
-	return pr
-}
-
-func (pr *ProgramQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *ProgramQuery {
-	return pr
-}
-
-// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (s *ShoutQuery) CollectFields(ctx context.Context, satisfies ...string) *ShoutQuery {
-	if fc := graphql.GetFieldContext(ctx); fc != nil {
-		s = s.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
-	}
-	return s
-}
-
-func (s *ShoutQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *ShoutQuery {
-	return s
+func (d *DietQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *DietQuery {
+	return d
 }
 
 // CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
@@ -66,16 +42,4 @@ func (us *UserSettingsQuery) CollectFields(ctx context.Context, satisfies ...str
 
 func (us *UserSettingsQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *UserSettingsQuery {
 	return us
-}
-
-// CollectFields tells the query-builder to eagerly load connected nodes by resolver context.
-func (w *WorkoutQuery) CollectFields(ctx context.Context, satisfies ...string) *WorkoutQuery {
-	if fc := graphql.GetFieldContext(ctx); fc != nil {
-		w = w.collectField(graphql.GetOperationContext(ctx), fc.Field, satisfies...)
-	}
-	return w
-}
-
-func (w *WorkoutQuery) collectField(ctx *graphql.OperationContext, field graphql.CollectedField, satisfies ...string) *WorkoutQuery {
-	return w
 }

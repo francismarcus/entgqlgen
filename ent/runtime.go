@@ -5,45 +5,27 @@ package ent
 import (
 	"time"
 
-	"github.com/francismarcus/eg/ent/program"
+	"github.com/francismarcus/eg/ent/diet"
 	"github.com/francismarcus/eg/ent/schema"
-	"github.com/francismarcus/eg/ent/shout"
 	"github.com/francismarcus/eg/ent/user"
-	"github.com/francismarcus/eg/ent/workout"
 )
 
 // The init function reads all schema descriptors with runtime
 // code (default values, validators or hooks) and stitches it
 // to their package variables.
 func init() {
-	programFields := schema.Program{}.Fields()
-	_ = programFields
-	// programDescCreatedAt is the schema descriptor for created_at field.
-	programDescCreatedAt := programFields[0].Descriptor()
-	// program.DefaultCreatedAt holds the default value on creation for the created_at field.
-	program.DefaultCreatedAt = programDescCreatedAt.Default.(func() time.Time)
-	// programDescUpdatedAt is the schema descriptor for updated_at field.
-	programDescUpdatedAt := programFields[1].Descriptor()
-	// program.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	program.DefaultUpdatedAt = programDescUpdatedAt.Default.(func() time.Time)
-	// program.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	program.UpdateDefaultUpdatedAt = programDescUpdatedAt.UpdateDefault.(func() time.Time)
-	shoutFields := schema.Shout{}.Fields()
-	_ = shoutFields
-	// shoutDescCreatedAt is the schema descriptor for created_at field.
-	shoutDescCreatedAt := shoutFields[0].Descriptor()
-	// shout.DefaultCreatedAt holds the default value on creation for the created_at field.
-	shout.DefaultCreatedAt = shoutDescCreatedAt.Default.(func() time.Time)
-	// shoutDescUpdatedAt is the schema descriptor for updated_at field.
-	shoutDescUpdatedAt := shoutFields[1].Descriptor()
-	// shout.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	shout.DefaultUpdatedAt = shoutDescUpdatedAt.Default.(func() time.Time)
-	// shout.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	shout.UpdateDefaultUpdatedAt = shoutDescUpdatedAt.UpdateDefault.(func() time.Time)
-	// shoutDescLikes is the schema descriptor for likes field.
-	shoutDescLikes := shoutFields[3].Descriptor()
-	// shout.DefaultLikes holds the default value on creation for the likes field.
-	shout.DefaultLikes = shoutDescLikes.Default.(int)
+	dietFields := schema.Diet{}.Fields()
+	_ = dietFields
+	// dietDescCreatedAt is the schema descriptor for created_at field.
+	dietDescCreatedAt := dietFields[0].Descriptor()
+	// diet.DefaultCreatedAt holds the default value on creation for the created_at field.
+	diet.DefaultCreatedAt = dietDescCreatedAt.Default.(func() time.Time)
+	// dietDescUpdatedAt is the schema descriptor for updated_at field.
+	dietDescUpdatedAt := dietFields[1].Descriptor()
+	// diet.DefaultUpdatedAt holds the default value on creation for the updated_at field.
+	diet.DefaultUpdatedAt = dietDescUpdatedAt.Default.(func() time.Time)
+	// diet.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
+	diet.UpdateDefaultUpdatedAt = dietDescUpdatedAt.UpdateDefault.(func() time.Time)
 	userFields := schema.User{}.Fields()
 	_ = userFields
 	// userDescCreatedAt is the schema descriptor for created_at field.
@@ -60,28 +42,4 @@ func init() {
 	userDescEmail := userFields[3].Descriptor()
 	// user.EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	user.EmailValidator = userDescEmail.Validators[0].(func(string) error)
-	// userDescFollowsCount is the schema descriptor for follows_count field.
-	userDescFollowsCount := userFields[5].Descriptor()
-	// user.DefaultFollowsCount holds the default value on creation for the follows_count field.
-	user.DefaultFollowsCount = userDescFollowsCount.Default.(int)
-	// userDescFollowersCount is the schema descriptor for followers_count field.
-	userDescFollowersCount := userFields[6].Descriptor()
-	// user.DefaultFollowersCount holds the default value on creation for the followers_count field.
-	user.DefaultFollowersCount = userDescFollowersCount.Default.(int)
-	// userDescShoutsCount is the schema descriptor for shouts_count field.
-	userDescShoutsCount := userFields[7].Descriptor()
-	// user.DefaultShoutsCount holds the default value on creation for the shouts_count field.
-	user.DefaultShoutsCount = userDescShoutsCount.Default.(int)
-	workoutFields := schema.Workout{}.Fields()
-	_ = workoutFields
-	// workoutDescCreatedAt is the schema descriptor for created_at field.
-	workoutDescCreatedAt := workoutFields[0].Descriptor()
-	// workout.DefaultCreatedAt holds the default value on creation for the created_at field.
-	workout.DefaultCreatedAt = workoutDescCreatedAt.Default.(func() time.Time)
-	// workoutDescUpdatedAt is the schema descriptor for updated_at field.
-	workoutDescUpdatedAt := workoutFields[1].Descriptor()
-	// workout.DefaultUpdatedAt holds the default value on creation for the updated_at field.
-	workout.DefaultUpdatedAt = workoutDescUpdatedAt.Default.(func() time.Time)
-	// workout.UpdateDefaultUpdatedAt holds the default value on update for the updated_at field.
-	workout.UpdateDefaultUpdatedAt = workoutDescUpdatedAt.UpdateDefault.(func() time.Time)
 }

@@ -10,8 +10,7 @@ import (
 
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
-	"github.com/francismarcus/eg/ent/program"
-	"github.com/francismarcus/eg/ent/shout"
+	"github.com/francismarcus/eg/ent/diet"
 	"github.com/francismarcus/eg/ent/user"
 	"github.com/francismarcus/eg/ent/usersettings"
 )
@@ -69,123 +68,6 @@ func (uc *UserCreate) SetPassword(s string) *UserCreate {
 	return uc
 }
 
-// SetFollowsCount sets the follows_count field.
-func (uc *UserCreate) SetFollowsCount(i int) *UserCreate {
-	uc.mutation.SetFollowsCount(i)
-	return uc
-}
-
-// SetNillableFollowsCount sets the follows_count field if the given value is not nil.
-func (uc *UserCreate) SetNillableFollowsCount(i *int) *UserCreate {
-	if i != nil {
-		uc.SetFollowsCount(*i)
-	}
-	return uc
-}
-
-// SetFollowersCount sets the followers_count field.
-func (uc *UserCreate) SetFollowersCount(i int) *UserCreate {
-	uc.mutation.SetFollowersCount(i)
-	return uc
-}
-
-// SetNillableFollowersCount sets the followers_count field if the given value is not nil.
-func (uc *UserCreate) SetNillableFollowersCount(i *int) *UserCreate {
-	if i != nil {
-		uc.SetFollowersCount(*i)
-	}
-	return uc
-}
-
-// SetShoutsCount sets the shouts_count field.
-func (uc *UserCreate) SetShoutsCount(i int) *UserCreate {
-	uc.mutation.SetShoutsCount(i)
-	return uc
-}
-
-// SetNillableShoutsCount sets the shouts_count field if the given value is not nil.
-func (uc *UserCreate) SetNillableShoutsCount(i *int) *UserCreate {
-	if i != nil {
-		uc.SetShoutsCount(*i)
-	}
-	return uc
-}
-
-// AddFollowerIDs adds the followers edge to User by ids.
-func (uc *UserCreate) AddFollowerIDs(ids ...int) *UserCreate {
-	uc.mutation.AddFollowerIDs(ids...)
-	return uc
-}
-
-// AddFollowers adds the followers edges to User.
-func (uc *UserCreate) AddFollowers(u ...*User) *UserCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uc.AddFollowerIDs(ids...)
-}
-
-// AddFollowingIDs adds the following edge to User by ids.
-func (uc *UserCreate) AddFollowingIDs(ids ...int) *UserCreate {
-	uc.mutation.AddFollowingIDs(ids...)
-	return uc
-}
-
-// AddFollowing adds the following edges to User.
-func (uc *UserCreate) AddFollowing(u ...*User) *UserCreate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uc.AddFollowingIDs(ids...)
-}
-
-// AddProgramIDs adds the programs edge to Program by ids.
-func (uc *UserCreate) AddProgramIDs(ids ...int) *UserCreate {
-	uc.mutation.AddProgramIDs(ids...)
-	return uc
-}
-
-// AddPrograms adds the programs edges to Program.
-func (uc *UserCreate) AddPrograms(p ...*Program) *UserCreate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return uc.AddProgramIDs(ids...)
-}
-
-// AddShoutIDs adds the shouts edge to Shout by ids.
-func (uc *UserCreate) AddShoutIDs(ids ...int) *UserCreate {
-	uc.mutation.AddShoutIDs(ids...)
-	return uc
-}
-
-// AddShouts adds the shouts edges to Shout.
-func (uc *UserCreate) AddShouts(s ...*Shout) *UserCreate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return uc.AddShoutIDs(ids...)
-}
-
-// AddLikedShoutIDs adds the liked_shouts edge to Shout by ids.
-func (uc *UserCreate) AddLikedShoutIDs(ids ...int) *UserCreate {
-	uc.mutation.AddLikedShoutIDs(ids...)
-	return uc
-}
-
-// AddLikedShouts adds the liked_shouts edges to Shout.
-func (uc *UserCreate) AddLikedShouts(s ...*Shout) *UserCreate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return uc.AddLikedShoutIDs(ids...)
-}
-
 // SetSettingsID sets the settings edge to UserSettings by id.
 func (uc *UserCreate) SetSettingsID(id int) *UserCreate {
 	uc.mutation.SetSettingsID(id)
@@ -203,6 +85,21 @@ func (uc *UserCreate) SetNillableSettingsID(id *int) *UserCreate {
 // SetSettings sets the settings edge to UserSettings.
 func (uc *UserCreate) SetSettings(u *UserSettings) *UserCreate {
 	return uc.SetSettingsID(u.ID)
+}
+
+// AddDietIDs adds the diets edge to Diet by ids.
+func (uc *UserCreate) AddDietIDs(ids ...int) *UserCreate {
+	uc.mutation.AddDietIDs(ids...)
+	return uc
+}
+
+// AddDiets adds the diets edges to Diet.
+func (uc *UserCreate) AddDiets(d ...*Diet) *UserCreate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uc.AddDietIDs(ids...)
 }
 
 // Mutation returns the UserMutation object of the builder.
@@ -265,18 +162,6 @@ func (uc *UserCreate) defaults() {
 		v := user.DefaultUpdatedAt()
 		uc.mutation.SetUpdatedAt(v)
 	}
-	if _, ok := uc.mutation.FollowsCount(); !ok {
-		v := user.DefaultFollowsCount
-		uc.mutation.SetFollowsCount(v)
-	}
-	if _, ok := uc.mutation.FollowersCount(); !ok {
-		v := user.DefaultFollowersCount
-		uc.mutation.SetFollowersCount(v)
-	}
-	if _, ok := uc.mutation.ShoutsCount(); !ok {
-		v := user.DefaultShoutsCount
-		uc.mutation.SetShoutsCount(v)
-	}
 }
 
 // check runs all checks and user-defined validators on the builder.
@@ -300,15 +185,6 @@ func (uc *UserCreate) check() error {
 	}
 	if _, ok := uc.mutation.Password(); !ok {
 		return &ValidationError{Name: "password", err: errors.New("ent: missing required field \"password\"")}
-	}
-	if _, ok := uc.mutation.FollowsCount(); !ok {
-		return &ValidationError{Name: "follows_count", err: errors.New("ent: missing required field \"follows_count\"")}
-	}
-	if _, ok := uc.mutation.FollowersCount(); !ok {
-		return &ValidationError{Name: "followers_count", err: errors.New("ent: missing required field \"followers_count\"")}
-	}
-	if _, ok := uc.mutation.ShoutsCount(); !ok {
-		return &ValidationError{Name: "shouts_count", err: errors.New("ent: missing required field \"shouts_count\"")}
 	}
 	return nil
 }
@@ -377,125 +253,6 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 		})
 		_node.Password = value
 	}
-	if value, ok := uc.mutation.FollowsCount(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldFollowsCount,
-		})
-		_node.FollowsCount = value
-	}
-	if value, ok := uc.mutation.FollowersCount(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldFollowersCount,
-		})
-		_node.FollowersCount = value
-	}
-	if value, ok := uc.mutation.ShoutsCount(); ok {
-		_spec.Fields = append(_spec.Fields, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldShoutsCount,
-		})
-		_node.ShoutsCount = value
-	}
-	if nodes := uc.mutation.FollowersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.FollowersTable,
-			Columns: user.FollowersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := uc.mutation.FollowingIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FollowingTable,
-			Columns: user.FollowingPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := uc.mutation.ProgramsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ProgramsTable,
-			Columns: []string{user.ProgramsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: program.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := uc.mutation.ShoutsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ShoutsTable,
-			Columns: []string{user.ShoutsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
-	if nodes := uc.mutation.LikedShoutsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.LikedShoutsTable,
-			Columns: user.LikedShoutsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges = append(_spec.Edges, edge)
-	}
 	if nodes := uc.mutation.SettingsIDs(); len(nodes) > 0 {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -507,6 +264,25 @@ func (uc *UserCreate) createSpec() (*User, *sqlgraph.CreateSpec) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: usersettings.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges = append(_spec.Edges, edge)
+	}
+	if nodes := uc.mutation.DietsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DietsTable,
+			Columns: []string{user.DietsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: diet.FieldID,
 				},
 			},
 		}

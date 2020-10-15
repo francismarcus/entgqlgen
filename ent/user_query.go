@@ -12,9 +12,8 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
+	"github.com/francismarcus/eg/ent/diet"
 	"github.com/francismarcus/eg/ent/predicate"
-	"github.com/francismarcus/eg/ent/program"
-	"github.com/francismarcus/eg/ent/shout"
 	"github.com/francismarcus/eg/ent/user"
 	"github.com/francismarcus/eg/ent/usersettings"
 )
@@ -28,12 +27,8 @@ type UserQuery struct {
 	unique     []string
 	predicates []predicate.User
 	// eager-loading edges.
-	withFollowers   *UserQuery
-	withFollowing   *UserQuery
-	withPrograms    *ProgramQuery
-	withShouts      *ShoutQuery
-	withLikedShouts *ShoutQuery
-	withSettings    *UserSettingsQuery
+	withSettings *UserSettingsQuery
+	withDiets    *DietQuery
 	// intermediate query (i.e. traversal path).
 	sql  *sql.Selector
 	path func(context.Context) (*sql.Selector, error)
@@ -63,116 +58,6 @@ func (uq *UserQuery) Order(o ...OrderFunc) *UserQuery {
 	return uq
 }
 
-// QueryFollowers chains the current query on the followers edge.
-func (uq *UserQuery) QueryFollowers() *UserQuery {
-	query := &UserQuery{config: uq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := uq.sqlQuery()
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryFollowing chains the current query on the following edge.
-func (uq *UserQuery) QueryFollowing() *UserQuery {
-	query := &UserQuery{config: uq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := uq.sqlQuery()
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryPrograms chains the current query on the programs edge.
-func (uq *UserQuery) QueryPrograms() *ProgramQuery {
-	query := &ProgramQuery{config: uq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := uq.sqlQuery()
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(program.Table, program.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.ProgramsTable, user.ProgramsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryShouts chains the current query on the shouts edge.
-func (uq *UserQuery) QueryShouts() *ShoutQuery {
-	query := &ShoutQuery{config: uq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := uq.sqlQuery()
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(shout.Table, shout.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.ShoutsTable, user.ShoutsColumn),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
-// QueryLikedShouts chains the current query on the liked_shouts edge.
-func (uq *UserQuery) QueryLikedShouts() *ShoutQuery {
-	query := &ShoutQuery{config: uq.config}
-	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
-		if err := uq.prepareQuery(ctx); err != nil {
-			return nil, err
-		}
-		selector := uq.sqlQuery()
-		if err := selector.Err(); err != nil {
-			return nil, err
-		}
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, selector),
-			sqlgraph.To(shout.Table, shout.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, user.LikedShoutsTable, user.LikedShoutsPrimaryKey...),
-		)
-		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
-		return fromU, nil
-	}
-	return query
-}
-
 // QuerySettings chains the current query on the settings edge.
 func (uq *UserQuery) QuerySettings() *UserSettingsQuery {
 	query := &UserSettingsQuery{config: uq.config}
@@ -188,6 +73,28 @@ func (uq *UserQuery) QuerySettings() *UserSettingsQuery {
 			sqlgraph.From(user.Table, user.FieldID, selector),
 			sqlgraph.To(usersettings.Table, usersettings.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.SettingsTable, user.SettingsColumn),
+		)
+		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
+		return fromU, nil
+	}
+	return query
+}
+
+// QueryDiets chains the current query on the diets edge.
+func (uq *UserQuery) QueryDiets() *DietQuery {
+	query := &DietQuery{config: uq.config}
+	query.path = func(ctx context.Context) (fromU *sql.Selector, err error) {
+		if err := uq.prepareQuery(ctx); err != nil {
+			return nil, err
+		}
+		selector := uq.sqlQuery()
+		if err := selector.Err(); err != nil {
+			return nil, err
+		}
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, selector),
+			sqlgraph.To(diet.Table, diet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DietsTable, user.DietsColumn),
 		)
 		fromU = sqlgraph.SetNeighbors(uq.driver.Dialect(), step)
 		return fromU, nil
@@ -374,61 +281,6 @@ func (uq *UserQuery) Clone() *UserQuery {
 	}
 }
 
-//  WithFollowers tells the query-builder to eager-loads the nodes that are connected to
-// the "followers" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithFollowers(opts ...func(*UserQuery)) *UserQuery {
-	query := &UserQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withFollowers = query
-	return uq
-}
-
-//  WithFollowing tells the query-builder to eager-loads the nodes that are connected to
-// the "following" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithFollowing(opts ...func(*UserQuery)) *UserQuery {
-	query := &UserQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withFollowing = query
-	return uq
-}
-
-//  WithPrograms tells the query-builder to eager-loads the nodes that are connected to
-// the "programs" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithPrograms(opts ...func(*ProgramQuery)) *UserQuery {
-	query := &ProgramQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withPrograms = query
-	return uq
-}
-
-//  WithShouts tells the query-builder to eager-loads the nodes that are connected to
-// the "shouts" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithShouts(opts ...func(*ShoutQuery)) *UserQuery {
-	query := &ShoutQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withShouts = query
-	return uq
-}
-
-//  WithLikedShouts tells the query-builder to eager-loads the nodes that are connected to
-// the "liked_shouts" edge. The optional arguments used to configure the query builder of the edge.
-func (uq *UserQuery) WithLikedShouts(opts ...func(*ShoutQuery)) *UserQuery {
-	query := &ShoutQuery{config: uq.config}
-	for _, opt := range opts {
-		opt(query)
-	}
-	uq.withLikedShouts = query
-	return uq
-}
-
 //  WithSettings tells the query-builder to eager-loads the nodes that are connected to
 // the "settings" edge. The optional arguments used to configure the query builder of the edge.
 func (uq *UserQuery) WithSettings(opts ...func(*UserSettingsQuery)) *UserQuery {
@@ -437,6 +289,17 @@ func (uq *UserQuery) WithSettings(opts ...func(*UserSettingsQuery)) *UserQuery {
 		opt(query)
 	}
 	uq.withSettings = query
+	return uq
+}
+
+//  WithDiets tells the query-builder to eager-loads the nodes that are connected to
+// the "diets" edge. The optional arguments used to configure the query builder of the edge.
+func (uq *UserQuery) WithDiets(opts ...func(*DietQuery)) *UserQuery {
+	query := &DietQuery{config: uq.config}
+	for _, opt := range opts {
+		opt(query)
+	}
+	uq.withDiets = query
 	return uq
 }
 
@@ -506,13 +369,9 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	var (
 		nodes       = []*User{}
 		_spec       = uq.querySpec()
-		loadedTypes = [6]bool{
-			uq.withFollowers != nil,
-			uq.withFollowing != nil,
-			uq.withPrograms != nil,
-			uq.withShouts != nil,
-			uq.withLikedShouts != nil,
+		loadedTypes = [2]bool{
 			uq.withSettings != nil,
+			uq.withDiets != nil,
 		}
 	)
 	_spec.ScanValues = func() []interface{} {
@@ -534,251 +393,6 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 	}
 	if len(nodes) == 0 {
 		return nodes, nil
-	}
-
-	if query := uq.withFollowers; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*User, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
-		}
-		var (
-			edgeids []int
-			edges   = make(map[int][]*User)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: true,
-				Table:   user.FollowersTable,
-				Columns: user.FollowersPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(user.FollowersPrimaryKey[1], fks...))
-			},
-
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				edgeids = append(edgeids, inValue)
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "followers": %v`, err)
-		}
-		query.Where(user.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "followers" node returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Followers = append(nodes[i].Edges.Followers, n)
-			}
-		}
-	}
-
-	if query := uq.withFollowing; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*User, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
-		}
-		var (
-			edgeids []int
-			edges   = make(map[int][]*User)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: false,
-				Table:   user.FollowingTable,
-				Columns: user.FollowingPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(user.FollowingPrimaryKey[0], fks...))
-			},
-
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				edgeids = append(edgeids, inValue)
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "following": %v`, err)
-		}
-		query.Where(user.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "following" node returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.Following = append(nodes[i].Edges.Following, n)
-			}
-		}
-	}
-
-	if query := uq.withPrograms; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*User)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.Program(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.ProgramsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.user_programs
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_programs" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_programs" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Programs = append(node.Edges.Programs, n)
-		}
-	}
-
-	if query := uq.withShouts; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		nodeids := make(map[int]*User)
-		for i := range nodes {
-			fks = append(fks, nodes[i].ID)
-			nodeids[nodes[i].ID] = nodes[i]
-		}
-		query.withFKs = true
-		query.Where(predicate.Shout(func(s *sql.Selector) {
-			s.Where(sql.InValues(user.ShoutsColumn, fks...))
-		}))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			fk := n.user_shouts
-			if fk == nil {
-				return nil, fmt.Errorf(`foreign-key "user_shouts" is nil for node %v`, n.ID)
-			}
-			node, ok := nodeids[*fk]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected foreign-key "user_shouts" returned %v for node %v`, *fk, n.ID)
-			}
-			node.Edges.Shouts = append(node.Edges.Shouts, n)
-		}
-	}
-
-	if query := uq.withLikedShouts; query != nil {
-		fks := make([]driver.Value, 0, len(nodes))
-		ids := make(map[int]*User, len(nodes))
-		for _, node := range nodes {
-			ids[node.ID] = node
-			fks = append(fks, node.ID)
-		}
-		var (
-			edgeids []int
-			edges   = make(map[int][]*User)
-		)
-		_spec := &sqlgraph.EdgeQuerySpec{
-			Edge: &sqlgraph.EdgeSpec{
-				Inverse: true,
-				Table:   user.LikedShoutsTable,
-				Columns: user.LikedShoutsPrimaryKey,
-			},
-			Predicate: func(s *sql.Selector) {
-				s.Where(sql.InValues(user.LikedShoutsPrimaryKey[1], fks...))
-			},
-
-			ScanValues: func() [2]interface{} {
-				return [2]interface{}{&sql.NullInt64{}, &sql.NullInt64{}}
-			},
-			Assign: func(out, in interface{}) error {
-				eout, ok := out.(*sql.NullInt64)
-				if !ok || eout == nil {
-					return fmt.Errorf("unexpected id value for edge-out")
-				}
-				ein, ok := in.(*sql.NullInt64)
-				if !ok || ein == nil {
-					return fmt.Errorf("unexpected id value for edge-in")
-				}
-				outValue := int(eout.Int64)
-				inValue := int(ein.Int64)
-				node, ok := ids[outValue]
-				if !ok {
-					return fmt.Errorf("unexpected node id in edges: %v", outValue)
-				}
-				edgeids = append(edgeids, inValue)
-				edges[inValue] = append(edges[inValue], node)
-				return nil
-			},
-		}
-		if err := sqlgraph.QueryEdges(ctx, uq.driver, _spec); err != nil {
-			return nil, fmt.Errorf(`query edges "liked_shouts": %v`, err)
-		}
-		query.Where(shout.IDIn(edgeids...))
-		neighbors, err := query.All(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for _, n := range neighbors {
-			nodes, ok := edges[n.ID]
-			if !ok {
-				return nil, fmt.Errorf(`unexpected "liked_shouts" node returned %v`, n.ID)
-			}
-			for i := range nodes {
-				nodes[i].Edges.LikedShouts = append(nodes[i].Edges.LikedShouts, n)
-			}
-		}
 	}
 
 	if query := uq.withSettings; query != nil {
@@ -806,6 +420,34 @@ func (uq *UserQuery) sqlAll(ctx context.Context) ([]*User, error) {
 				return nil, fmt.Errorf(`unexpected foreign-key "user_settings" returned %v for node %v`, *fk, n.ID)
 			}
 			node.Edges.Settings = n
+		}
+	}
+
+	if query := uq.withDiets; query != nil {
+		fks := make([]driver.Value, 0, len(nodes))
+		nodeids := make(map[int]*User)
+		for i := range nodes {
+			fks = append(fks, nodes[i].ID)
+			nodeids[nodes[i].ID] = nodes[i]
+		}
+		query.withFKs = true
+		query.Where(predicate.Diet(func(s *sql.Selector) {
+			s.Where(sql.InValues(user.DietsColumn, fks...))
+		}))
+		neighbors, err := query.All(ctx)
+		if err != nil {
+			return nil, err
+		}
+		for _, n := range neighbors {
+			fk := n.user_diets
+			if fk == nil {
+				return nil, fmt.Errorf(`foreign-key "user_diets" is nil for node %v`, n.ID)
+			}
+			node, ok := nodeids[*fk]
+			if !ok {
+				return nil, fmt.Errorf(`unexpected foreign-key "user_diets" returned %v for node %v`, *fk, n.ID)
+			}
+			node.Edges.Diets = append(node.Edges.Diets, n)
 		}
 	}
 

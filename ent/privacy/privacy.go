@@ -210,76 +210,28 @@ func DenyMutationOperationRule(op ent.Op) MutationRule {
 	return OnMutationOperation(rule, op)
 }
 
-// The ExerciseQueryRuleFunc type is an adapter to allow the use of ordinary
+// The DietQueryRuleFunc type is an adapter to allow the use of ordinary
 // functions as a query rule.
-type ExerciseQueryRuleFunc func(context.Context, *ent.ExerciseQuery) error
+type DietQueryRuleFunc func(context.Context, *ent.DietQuery) error
 
 // EvalQuery return f(ctx, q).
-func (f ExerciseQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
-	if q, ok := q.(*ent.ExerciseQuery); ok {
+func (f DietQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
+	if q, ok := q.(*ent.DietQuery); ok {
 		return f(ctx, q)
 	}
-	return Denyf("ent/privacy: unexpected query type %T, expect *ent.ExerciseQuery", q)
+	return Denyf("ent/privacy: unexpected query type %T, expect *ent.DietQuery", q)
 }
 
-// The ExerciseMutationRuleFunc type is an adapter to allow the use of ordinary
+// The DietMutationRuleFunc type is an adapter to allow the use of ordinary
 // functions as a mutation rule.
-type ExerciseMutationRuleFunc func(context.Context, *ent.ExerciseMutation) error
+type DietMutationRuleFunc func(context.Context, *ent.DietMutation) error
 
 // EvalMutation calls f(ctx, m).
-func (f ExerciseMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
-	if m, ok := m.(*ent.ExerciseMutation); ok {
+func (f DietMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
+	if m, ok := m.(*ent.DietMutation); ok {
 		return f(ctx, m)
 	}
-	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ExerciseMutation", m)
-}
-
-// The ProgramQueryRuleFunc type is an adapter to allow the use of ordinary
-// functions as a query rule.
-type ProgramQueryRuleFunc func(context.Context, *ent.ProgramQuery) error
-
-// EvalQuery return f(ctx, q).
-func (f ProgramQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
-	if q, ok := q.(*ent.ProgramQuery); ok {
-		return f(ctx, q)
-	}
-	return Denyf("ent/privacy: unexpected query type %T, expect *ent.ProgramQuery", q)
-}
-
-// The ProgramMutationRuleFunc type is an adapter to allow the use of ordinary
-// functions as a mutation rule.
-type ProgramMutationRuleFunc func(context.Context, *ent.ProgramMutation) error
-
-// EvalMutation calls f(ctx, m).
-func (f ProgramMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
-	if m, ok := m.(*ent.ProgramMutation); ok {
-		return f(ctx, m)
-	}
-	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ProgramMutation", m)
-}
-
-// The ShoutQueryRuleFunc type is an adapter to allow the use of ordinary
-// functions as a query rule.
-type ShoutQueryRuleFunc func(context.Context, *ent.ShoutQuery) error
-
-// EvalQuery return f(ctx, q).
-func (f ShoutQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
-	if q, ok := q.(*ent.ShoutQuery); ok {
-		return f(ctx, q)
-	}
-	return Denyf("ent/privacy: unexpected query type %T, expect *ent.ShoutQuery", q)
-}
-
-// The ShoutMutationRuleFunc type is an adapter to allow the use of ordinary
-// functions as a mutation rule.
-type ShoutMutationRuleFunc func(context.Context, *ent.ShoutMutation) error
-
-// EvalMutation calls f(ctx, m).
-func (f ShoutMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
-	if m, ok := m.(*ent.ShoutMutation); ok {
-		return f(ctx, m)
-	}
-	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.ShoutMutation", m)
+	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.DietMutation", m)
 }
 
 // The UserQueryRuleFunc type is an adapter to allow the use of ordinary
@@ -328,28 +280,4 @@ func (f UserSettingsMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mu
 		return f(ctx, m)
 	}
 	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.UserSettingsMutation", m)
-}
-
-// The WorkoutQueryRuleFunc type is an adapter to allow the use of ordinary
-// functions as a query rule.
-type WorkoutQueryRuleFunc func(context.Context, *ent.WorkoutQuery) error
-
-// EvalQuery return f(ctx, q).
-func (f WorkoutQueryRuleFunc) EvalQuery(ctx context.Context, q ent.Query) error {
-	if q, ok := q.(*ent.WorkoutQuery); ok {
-		return f(ctx, q)
-	}
-	return Denyf("ent/privacy: unexpected query type %T, expect *ent.WorkoutQuery", q)
-}
-
-// The WorkoutMutationRuleFunc type is an adapter to allow the use of ordinary
-// functions as a mutation rule.
-type WorkoutMutationRuleFunc func(context.Context, *ent.WorkoutMutation) error
-
-// EvalMutation calls f(ctx, m).
-func (f WorkoutMutationRuleFunc) EvalMutation(ctx context.Context, m ent.Mutation) error {
-	if m, ok := m.(*ent.WorkoutMutation); ok {
-		return f(ctx, m)
-	}
-	return Denyf("ent/privacy: unexpected mutation type %T, expect *ent.WorkoutMutation", m)
 }

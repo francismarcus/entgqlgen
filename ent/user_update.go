@@ -10,9 +10,8 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/sqlgraph"
 	"github.com/facebook/ent/schema/field"
+	"github.com/francismarcus/eg/ent/diet"
 	"github.com/francismarcus/eg/ent/predicate"
-	"github.com/francismarcus/eg/ent/program"
-	"github.com/francismarcus/eg/ent/shout"
 	"github.com/francismarcus/eg/ent/user"
 	"github.com/francismarcus/eg/ent/usersettings"
 )
@@ -55,144 +54,6 @@ func (uu *UserUpdate) SetPassword(s string) *UserUpdate {
 	return uu
 }
 
-// SetFollowsCount sets the follows_count field.
-func (uu *UserUpdate) SetFollowsCount(i int) *UserUpdate {
-	uu.mutation.ResetFollowsCount()
-	uu.mutation.SetFollowsCount(i)
-	return uu
-}
-
-// SetNillableFollowsCount sets the follows_count field if the given value is not nil.
-func (uu *UserUpdate) SetNillableFollowsCount(i *int) *UserUpdate {
-	if i != nil {
-		uu.SetFollowsCount(*i)
-	}
-	return uu
-}
-
-// AddFollowsCount adds i to follows_count.
-func (uu *UserUpdate) AddFollowsCount(i int) *UserUpdate {
-	uu.mutation.AddFollowsCount(i)
-	return uu
-}
-
-// SetFollowersCount sets the followers_count field.
-func (uu *UserUpdate) SetFollowersCount(i int) *UserUpdate {
-	uu.mutation.ResetFollowersCount()
-	uu.mutation.SetFollowersCount(i)
-	return uu
-}
-
-// SetNillableFollowersCount sets the followers_count field if the given value is not nil.
-func (uu *UserUpdate) SetNillableFollowersCount(i *int) *UserUpdate {
-	if i != nil {
-		uu.SetFollowersCount(*i)
-	}
-	return uu
-}
-
-// AddFollowersCount adds i to followers_count.
-func (uu *UserUpdate) AddFollowersCount(i int) *UserUpdate {
-	uu.mutation.AddFollowersCount(i)
-	return uu
-}
-
-// SetShoutsCount sets the shouts_count field.
-func (uu *UserUpdate) SetShoutsCount(i int) *UserUpdate {
-	uu.mutation.ResetShoutsCount()
-	uu.mutation.SetShoutsCount(i)
-	return uu
-}
-
-// SetNillableShoutsCount sets the shouts_count field if the given value is not nil.
-func (uu *UserUpdate) SetNillableShoutsCount(i *int) *UserUpdate {
-	if i != nil {
-		uu.SetShoutsCount(*i)
-	}
-	return uu
-}
-
-// AddShoutsCount adds i to shouts_count.
-func (uu *UserUpdate) AddShoutsCount(i int) *UserUpdate {
-	uu.mutation.AddShoutsCount(i)
-	return uu
-}
-
-// AddFollowerIDs adds the followers edge to User by ids.
-func (uu *UserUpdate) AddFollowerIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddFollowerIDs(ids...)
-	return uu
-}
-
-// AddFollowers adds the followers edges to User.
-func (uu *UserUpdate) AddFollowers(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uu.AddFollowerIDs(ids...)
-}
-
-// AddFollowingIDs adds the following edge to User by ids.
-func (uu *UserUpdate) AddFollowingIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddFollowingIDs(ids...)
-	return uu
-}
-
-// AddFollowing adds the following edges to User.
-func (uu *UserUpdate) AddFollowing(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uu.AddFollowingIDs(ids...)
-}
-
-// AddProgramIDs adds the programs edge to Program by ids.
-func (uu *UserUpdate) AddProgramIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddProgramIDs(ids...)
-	return uu
-}
-
-// AddPrograms adds the programs edges to Program.
-func (uu *UserUpdate) AddPrograms(p ...*Program) *UserUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return uu.AddProgramIDs(ids...)
-}
-
-// AddShoutIDs adds the shouts edge to Shout by ids.
-func (uu *UserUpdate) AddShoutIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddShoutIDs(ids...)
-	return uu
-}
-
-// AddShouts adds the shouts edges to Shout.
-func (uu *UserUpdate) AddShouts(s ...*Shout) *UserUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return uu.AddShoutIDs(ids...)
-}
-
-// AddLikedShoutIDs adds the liked_shouts edge to Shout by ids.
-func (uu *UserUpdate) AddLikedShoutIDs(ids ...int) *UserUpdate {
-	uu.mutation.AddLikedShoutIDs(ids...)
-	return uu
-}
-
-// AddLikedShouts adds the liked_shouts edges to Shout.
-func (uu *UserUpdate) AddLikedShouts(s ...*Shout) *UserUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return uu.AddLikedShoutIDs(ids...)
-}
-
 // SetSettingsID sets the settings edge to UserSettings by id.
 func (uu *UserUpdate) SetSettingsID(id int) *UserUpdate {
 	uu.mutation.SetSettingsID(id)
@@ -212,120 +73,51 @@ func (uu *UserUpdate) SetSettings(u *UserSettings) *UserUpdate {
 	return uu.SetSettingsID(u.ID)
 }
 
+// AddDietIDs adds the diets edge to Diet by ids.
+func (uu *UserUpdate) AddDietIDs(ids ...int) *UserUpdate {
+	uu.mutation.AddDietIDs(ids...)
+	return uu
+}
+
+// AddDiets adds the diets edges to Diet.
+func (uu *UserUpdate) AddDiets(d ...*Diet) *UserUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.AddDietIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uu *UserUpdate) Mutation() *UserMutation {
 	return uu.mutation
-}
-
-// ClearFollowers clears all "followers" edges to type User.
-func (uu *UserUpdate) ClearFollowers() *UserUpdate {
-	uu.mutation.ClearFollowers()
-	return uu
-}
-
-// RemoveFollowerIDs removes the followers edge to User by ids.
-func (uu *UserUpdate) RemoveFollowerIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveFollowerIDs(ids...)
-	return uu
-}
-
-// RemoveFollowers removes followers edges to User.
-func (uu *UserUpdate) RemoveFollowers(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uu.RemoveFollowerIDs(ids...)
-}
-
-// ClearFollowing clears all "following" edges to type User.
-func (uu *UserUpdate) ClearFollowing() *UserUpdate {
-	uu.mutation.ClearFollowing()
-	return uu
-}
-
-// RemoveFollowingIDs removes the following edge to User by ids.
-func (uu *UserUpdate) RemoveFollowingIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveFollowingIDs(ids...)
-	return uu
-}
-
-// RemoveFollowing removes following edges to User.
-func (uu *UserUpdate) RemoveFollowing(u ...*User) *UserUpdate {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uu.RemoveFollowingIDs(ids...)
-}
-
-// ClearPrograms clears all "programs" edges to type Program.
-func (uu *UserUpdate) ClearPrograms() *UserUpdate {
-	uu.mutation.ClearPrograms()
-	return uu
-}
-
-// RemoveProgramIDs removes the programs edge to Program by ids.
-func (uu *UserUpdate) RemoveProgramIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveProgramIDs(ids...)
-	return uu
-}
-
-// RemovePrograms removes programs edges to Program.
-func (uu *UserUpdate) RemovePrograms(p ...*Program) *UserUpdate {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return uu.RemoveProgramIDs(ids...)
-}
-
-// ClearShouts clears all "shouts" edges to type Shout.
-func (uu *UserUpdate) ClearShouts() *UserUpdate {
-	uu.mutation.ClearShouts()
-	return uu
-}
-
-// RemoveShoutIDs removes the shouts edge to Shout by ids.
-func (uu *UserUpdate) RemoveShoutIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveShoutIDs(ids...)
-	return uu
-}
-
-// RemoveShouts removes shouts edges to Shout.
-func (uu *UserUpdate) RemoveShouts(s ...*Shout) *UserUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return uu.RemoveShoutIDs(ids...)
-}
-
-// ClearLikedShouts clears all "liked_shouts" edges to type Shout.
-func (uu *UserUpdate) ClearLikedShouts() *UserUpdate {
-	uu.mutation.ClearLikedShouts()
-	return uu
-}
-
-// RemoveLikedShoutIDs removes the liked_shouts edge to Shout by ids.
-func (uu *UserUpdate) RemoveLikedShoutIDs(ids ...int) *UserUpdate {
-	uu.mutation.RemoveLikedShoutIDs(ids...)
-	return uu
-}
-
-// RemoveLikedShouts removes liked_shouts edges to Shout.
-func (uu *UserUpdate) RemoveLikedShouts(s ...*Shout) *UserUpdate {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return uu.RemoveLikedShoutIDs(ids...)
 }
 
 // ClearSettings clears the "settings" edge to type UserSettings.
 func (uu *UserUpdate) ClearSettings() *UserUpdate {
 	uu.mutation.ClearSettings()
 	return uu
+}
+
+// ClearDiets clears all "diets" edges to type Diet.
+func (uu *UserUpdate) ClearDiets() *UserUpdate {
+	uu.mutation.ClearDiets()
+	return uu
+}
+
+// RemoveDietIDs removes the diets edge to Diet by ids.
+func (uu *UserUpdate) RemoveDietIDs(ids ...int) *UserUpdate {
+	uu.mutation.RemoveDietIDs(ids...)
+	return uu
+}
+
+// RemoveDiets removes diets edges to Diet.
+func (uu *UserUpdate) RemoveDiets(d ...*Diet) *UserUpdate {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uu.RemoveDietIDs(ids...)
 }
 
 // Save executes the query and returns the number of rows/vertices matched by this operation.
@@ -450,318 +242,6 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 			Column: user.FieldPassword,
 		})
 	}
-	if value, ok := uu.mutation.FollowsCount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldFollowsCount,
-		})
-	}
-	if value, ok := uu.mutation.AddedFollowsCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldFollowsCount,
-		})
-	}
-	if value, ok := uu.mutation.FollowersCount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldFollowersCount,
-		})
-	}
-	if value, ok := uu.mutation.AddedFollowersCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldFollowersCount,
-		})
-	}
-	if value, ok := uu.mutation.ShoutsCount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldShoutsCount,
-		})
-	}
-	if value, ok := uu.mutation.AddedShoutsCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldShoutsCount,
-		})
-	}
-	if uu.mutation.FollowersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.FollowersTable,
-			Columns: user.FollowersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !uu.mutation.FollowersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.FollowersTable,
-			Columns: user.FollowersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.FollowersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.FollowersTable,
-			Columns: user.FollowersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uu.mutation.FollowingCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FollowingTable,
-			Columns: user.FollowingPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !uu.mutation.FollowingCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FollowingTable,
-			Columns: user.FollowingPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.FollowingIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FollowingTable,
-			Columns: user.FollowingPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uu.mutation.ProgramsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ProgramsTable,
-			Columns: []string{user.ProgramsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: program.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RemovedProgramsIDs(); len(nodes) > 0 && !uu.mutation.ProgramsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ProgramsTable,
-			Columns: []string{user.ProgramsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: program.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.ProgramsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ProgramsTable,
-			Columns: []string{user.ProgramsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: program.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uu.mutation.ShoutsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ShoutsTable,
-			Columns: []string{user.ShoutsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RemovedShoutsIDs(); len(nodes) > 0 && !uu.mutation.ShoutsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ShoutsTable,
-			Columns: []string{user.ShoutsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.ShoutsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ShoutsTable,
-			Columns: []string{user.ShoutsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uu.mutation.LikedShoutsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.LikedShoutsTable,
-			Columns: user.LikedShoutsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.RemovedLikedShoutsIDs(); len(nodes) > 0 && !uu.mutation.LikedShoutsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.LikedShoutsTable,
-			Columns: user.LikedShoutsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uu.mutation.LikedShoutsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.LikedShoutsTable,
-			Columns: user.LikedShoutsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if uu.mutation.SettingsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -789,6 +269,60 @@ func (uu *UserUpdate) sqlSave(ctx context.Context) (n int, err error) {
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: usersettings.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uu.mutation.DietsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DietsTable,
+			Columns: []string{user.DietsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: diet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.RemovedDietsIDs(); len(nodes) > 0 && !uu.mutation.DietsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DietsTable,
+			Columns: []string{user.DietsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: diet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uu.mutation.DietsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DietsTable,
+			Columns: []string{user.DietsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: diet.FieldID,
 				},
 			},
 		}
@@ -839,144 +373,6 @@ func (uuo *UserUpdateOne) SetPassword(s string) *UserUpdateOne {
 	return uuo
 }
 
-// SetFollowsCount sets the follows_count field.
-func (uuo *UserUpdateOne) SetFollowsCount(i int) *UserUpdateOne {
-	uuo.mutation.ResetFollowsCount()
-	uuo.mutation.SetFollowsCount(i)
-	return uuo
-}
-
-// SetNillableFollowsCount sets the follows_count field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableFollowsCount(i *int) *UserUpdateOne {
-	if i != nil {
-		uuo.SetFollowsCount(*i)
-	}
-	return uuo
-}
-
-// AddFollowsCount adds i to follows_count.
-func (uuo *UserUpdateOne) AddFollowsCount(i int) *UserUpdateOne {
-	uuo.mutation.AddFollowsCount(i)
-	return uuo
-}
-
-// SetFollowersCount sets the followers_count field.
-func (uuo *UserUpdateOne) SetFollowersCount(i int) *UserUpdateOne {
-	uuo.mutation.ResetFollowersCount()
-	uuo.mutation.SetFollowersCount(i)
-	return uuo
-}
-
-// SetNillableFollowersCount sets the followers_count field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableFollowersCount(i *int) *UserUpdateOne {
-	if i != nil {
-		uuo.SetFollowersCount(*i)
-	}
-	return uuo
-}
-
-// AddFollowersCount adds i to followers_count.
-func (uuo *UserUpdateOne) AddFollowersCount(i int) *UserUpdateOne {
-	uuo.mutation.AddFollowersCount(i)
-	return uuo
-}
-
-// SetShoutsCount sets the shouts_count field.
-func (uuo *UserUpdateOne) SetShoutsCount(i int) *UserUpdateOne {
-	uuo.mutation.ResetShoutsCount()
-	uuo.mutation.SetShoutsCount(i)
-	return uuo
-}
-
-// SetNillableShoutsCount sets the shouts_count field if the given value is not nil.
-func (uuo *UserUpdateOne) SetNillableShoutsCount(i *int) *UserUpdateOne {
-	if i != nil {
-		uuo.SetShoutsCount(*i)
-	}
-	return uuo
-}
-
-// AddShoutsCount adds i to shouts_count.
-func (uuo *UserUpdateOne) AddShoutsCount(i int) *UserUpdateOne {
-	uuo.mutation.AddShoutsCount(i)
-	return uuo
-}
-
-// AddFollowerIDs adds the followers edge to User by ids.
-func (uuo *UserUpdateOne) AddFollowerIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddFollowerIDs(ids...)
-	return uuo
-}
-
-// AddFollowers adds the followers edges to User.
-func (uuo *UserUpdateOne) AddFollowers(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uuo.AddFollowerIDs(ids...)
-}
-
-// AddFollowingIDs adds the following edge to User by ids.
-func (uuo *UserUpdateOne) AddFollowingIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddFollowingIDs(ids...)
-	return uuo
-}
-
-// AddFollowing adds the following edges to User.
-func (uuo *UserUpdateOne) AddFollowing(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uuo.AddFollowingIDs(ids...)
-}
-
-// AddProgramIDs adds the programs edge to Program by ids.
-func (uuo *UserUpdateOne) AddProgramIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddProgramIDs(ids...)
-	return uuo
-}
-
-// AddPrograms adds the programs edges to Program.
-func (uuo *UserUpdateOne) AddPrograms(p ...*Program) *UserUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return uuo.AddProgramIDs(ids...)
-}
-
-// AddShoutIDs adds the shouts edge to Shout by ids.
-func (uuo *UserUpdateOne) AddShoutIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddShoutIDs(ids...)
-	return uuo
-}
-
-// AddShouts adds the shouts edges to Shout.
-func (uuo *UserUpdateOne) AddShouts(s ...*Shout) *UserUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return uuo.AddShoutIDs(ids...)
-}
-
-// AddLikedShoutIDs adds the liked_shouts edge to Shout by ids.
-func (uuo *UserUpdateOne) AddLikedShoutIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.AddLikedShoutIDs(ids...)
-	return uuo
-}
-
-// AddLikedShouts adds the liked_shouts edges to Shout.
-func (uuo *UserUpdateOne) AddLikedShouts(s ...*Shout) *UserUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return uuo.AddLikedShoutIDs(ids...)
-}
-
 // SetSettingsID sets the settings edge to UserSettings by id.
 func (uuo *UserUpdateOne) SetSettingsID(id int) *UserUpdateOne {
 	uuo.mutation.SetSettingsID(id)
@@ -996,120 +392,51 @@ func (uuo *UserUpdateOne) SetSettings(u *UserSettings) *UserUpdateOne {
 	return uuo.SetSettingsID(u.ID)
 }
 
+// AddDietIDs adds the diets edge to Diet by ids.
+func (uuo *UserUpdateOne) AddDietIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.AddDietIDs(ids...)
+	return uuo
+}
+
+// AddDiets adds the diets edges to Diet.
+func (uuo *UserUpdateOne) AddDiets(d ...*Diet) *UserUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.AddDietIDs(ids...)
+}
+
 // Mutation returns the UserMutation object of the builder.
 func (uuo *UserUpdateOne) Mutation() *UserMutation {
 	return uuo.mutation
-}
-
-// ClearFollowers clears all "followers" edges to type User.
-func (uuo *UserUpdateOne) ClearFollowers() *UserUpdateOne {
-	uuo.mutation.ClearFollowers()
-	return uuo
-}
-
-// RemoveFollowerIDs removes the followers edge to User by ids.
-func (uuo *UserUpdateOne) RemoveFollowerIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveFollowerIDs(ids...)
-	return uuo
-}
-
-// RemoveFollowers removes followers edges to User.
-func (uuo *UserUpdateOne) RemoveFollowers(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uuo.RemoveFollowerIDs(ids...)
-}
-
-// ClearFollowing clears all "following" edges to type User.
-func (uuo *UserUpdateOne) ClearFollowing() *UserUpdateOne {
-	uuo.mutation.ClearFollowing()
-	return uuo
-}
-
-// RemoveFollowingIDs removes the following edge to User by ids.
-func (uuo *UserUpdateOne) RemoveFollowingIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveFollowingIDs(ids...)
-	return uuo
-}
-
-// RemoveFollowing removes following edges to User.
-func (uuo *UserUpdateOne) RemoveFollowing(u ...*User) *UserUpdateOne {
-	ids := make([]int, len(u))
-	for i := range u {
-		ids[i] = u[i].ID
-	}
-	return uuo.RemoveFollowingIDs(ids...)
-}
-
-// ClearPrograms clears all "programs" edges to type Program.
-func (uuo *UserUpdateOne) ClearPrograms() *UserUpdateOne {
-	uuo.mutation.ClearPrograms()
-	return uuo
-}
-
-// RemoveProgramIDs removes the programs edge to Program by ids.
-func (uuo *UserUpdateOne) RemoveProgramIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveProgramIDs(ids...)
-	return uuo
-}
-
-// RemovePrograms removes programs edges to Program.
-func (uuo *UserUpdateOne) RemovePrograms(p ...*Program) *UserUpdateOne {
-	ids := make([]int, len(p))
-	for i := range p {
-		ids[i] = p[i].ID
-	}
-	return uuo.RemoveProgramIDs(ids...)
-}
-
-// ClearShouts clears all "shouts" edges to type Shout.
-func (uuo *UserUpdateOne) ClearShouts() *UserUpdateOne {
-	uuo.mutation.ClearShouts()
-	return uuo
-}
-
-// RemoveShoutIDs removes the shouts edge to Shout by ids.
-func (uuo *UserUpdateOne) RemoveShoutIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveShoutIDs(ids...)
-	return uuo
-}
-
-// RemoveShouts removes shouts edges to Shout.
-func (uuo *UserUpdateOne) RemoveShouts(s ...*Shout) *UserUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return uuo.RemoveShoutIDs(ids...)
-}
-
-// ClearLikedShouts clears all "liked_shouts" edges to type Shout.
-func (uuo *UserUpdateOne) ClearLikedShouts() *UserUpdateOne {
-	uuo.mutation.ClearLikedShouts()
-	return uuo
-}
-
-// RemoveLikedShoutIDs removes the liked_shouts edge to Shout by ids.
-func (uuo *UserUpdateOne) RemoveLikedShoutIDs(ids ...int) *UserUpdateOne {
-	uuo.mutation.RemoveLikedShoutIDs(ids...)
-	return uuo
-}
-
-// RemoveLikedShouts removes liked_shouts edges to Shout.
-func (uuo *UserUpdateOne) RemoveLikedShouts(s ...*Shout) *UserUpdateOne {
-	ids := make([]int, len(s))
-	for i := range s {
-		ids[i] = s[i].ID
-	}
-	return uuo.RemoveLikedShoutIDs(ids...)
 }
 
 // ClearSettings clears the "settings" edge to type UserSettings.
 func (uuo *UserUpdateOne) ClearSettings() *UserUpdateOne {
 	uuo.mutation.ClearSettings()
 	return uuo
+}
+
+// ClearDiets clears all "diets" edges to type Diet.
+func (uuo *UserUpdateOne) ClearDiets() *UserUpdateOne {
+	uuo.mutation.ClearDiets()
+	return uuo
+}
+
+// RemoveDietIDs removes the diets edge to Diet by ids.
+func (uuo *UserUpdateOne) RemoveDietIDs(ids ...int) *UserUpdateOne {
+	uuo.mutation.RemoveDietIDs(ids...)
+	return uuo
+}
+
+// RemoveDiets removes diets edges to Diet.
+func (uuo *UserUpdateOne) RemoveDiets(d ...*Diet) *UserUpdateOne {
+	ids := make([]int, len(d))
+	for i := range d {
+		ids[i] = d[i].ID
+	}
+	return uuo.RemoveDietIDs(ids...)
 }
 
 // Save executes the query and returns the updated entity.
@@ -1232,318 +559,6 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 			Column: user.FieldPassword,
 		})
 	}
-	if value, ok := uuo.mutation.FollowsCount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldFollowsCount,
-		})
-	}
-	if value, ok := uuo.mutation.AddedFollowsCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldFollowsCount,
-		})
-	}
-	if value, ok := uuo.mutation.FollowersCount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldFollowersCount,
-		})
-	}
-	if value, ok := uuo.mutation.AddedFollowersCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldFollowersCount,
-		})
-	}
-	if value, ok := uuo.mutation.ShoutsCount(); ok {
-		_spec.Fields.Set = append(_spec.Fields.Set, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldShoutsCount,
-		})
-	}
-	if value, ok := uuo.mutation.AddedShoutsCount(); ok {
-		_spec.Fields.Add = append(_spec.Fields.Add, &sqlgraph.FieldSpec{
-			Type:   field.TypeInt,
-			Value:  value,
-			Column: user.FieldShoutsCount,
-		})
-	}
-	if uuo.mutation.FollowersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.FollowersTable,
-			Columns: user.FollowersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RemovedFollowersIDs(); len(nodes) > 0 && !uuo.mutation.FollowersCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.FollowersTable,
-			Columns: user.FollowersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.FollowersIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.FollowersTable,
-			Columns: user.FollowersPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uuo.mutation.FollowingCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FollowingTable,
-			Columns: user.FollowingPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RemovedFollowingIDs(); len(nodes) > 0 && !uuo.mutation.FollowingCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FollowingTable,
-			Columns: user.FollowingPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.FollowingIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: false,
-			Table:   user.FollowingTable,
-			Columns: user.FollowingPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: user.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uuo.mutation.ProgramsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ProgramsTable,
-			Columns: []string{user.ProgramsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: program.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RemovedProgramsIDs(); len(nodes) > 0 && !uuo.mutation.ProgramsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ProgramsTable,
-			Columns: []string{user.ProgramsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: program.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.ProgramsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ProgramsTable,
-			Columns: []string{user.ProgramsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: program.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uuo.mutation.ShoutsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ShoutsTable,
-			Columns: []string{user.ShoutsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RemovedShoutsIDs(); len(nodes) > 0 && !uuo.mutation.ShoutsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ShoutsTable,
-			Columns: []string{user.ShoutsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.ShoutsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.O2M,
-			Inverse: false,
-			Table:   user.ShoutsTable,
-			Columns: []string{user.ShoutsColumn},
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
-	if uuo.mutation.LikedShoutsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.LikedShoutsTable,
-			Columns: user.LikedShoutsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.RemovedLikedShoutsIDs(); len(nodes) > 0 && !uuo.mutation.LikedShoutsCleared() {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.LikedShoutsTable,
-			Columns: user.LikedShoutsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
-	}
-	if nodes := uuo.mutation.LikedShoutsIDs(); len(nodes) > 0 {
-		edge := &sqlgraph.EdgeSpec{
-			Rel:     sqlgraph.M2M,
-			Inverse: true,
-			Table:   user.LikedShoutsTable,
-			Columns: user.LikedShoutsPrimaryKey,
-			Bidi:    false,
-			Target: &sqlgraph.EdgeTarget{
-				IDSpec: &sqlgraph.FieldSpec{
-					Type:   field.TypeInt,
-					Column: shout.FieldID,
-				},
-			},
-		}
-		for _, k := range nodes {
-			edge.Target.Nodes = append(edge.Target.Nodes, k)
-		}
-		_spec.Edges.Add = append(_spec.Edges.Add, edge)
-	}
 	if uuo.mutation.SettingsCleared() {
 		edge := &sqlgraph.EdgeSpec{
 			Rel:     sqlgraph.O2O,
@@ -1571,6 +586,60 @@ func (uuo *UserUpdateOne) sqlSave(ctx context.Context) (_node *User, err error) 
 				IDSpec: &sqlgraph.FieldSpec{
 					Type:   field.TypeInt,
 					Column: usersettings.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Add = append(_spec.Edges.Add, edge)
+	}
+	if uuo.mutation.DietsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DietsTable,
+			Columns: []string{user.DietsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: diet.FieldID,
+				},
+			},
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.RemovedDietsIDs(); len(nodes) > 0 && !uuo.mutation.DietsCleared() {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DietsTable,
+			Columns: []string{user.DietsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: diet.FieldID,
+				},
+			},
+		}
+		for _, k := range nodes {
+			edge.Target.Nodes = append(edge.Target.Nodes, k)
+		}
+		_spec.Edges.Clear = append(_spec.Edges.Clear, edge)
+	}
+	if nodes := uuo.mutation.DietsIDs(); len(nodes) > 0 {
+		edge := &sqlgraph.EdgeSpec{
+			Rel:     sqlgraph.O2M,
+			Inverse: false,
+			Table:   user.DietsTable,
+			Columns: []string{user.DietsColumn},
+			Bidi:    false,
+			Target: &sqlgraph.EdgeTarget{
+				IDSpec: &sqlgraph.FieldSpec{
+					Type:   field.TypeInt,
+					Column: diet.FieldID,
 				},
 			},
 		}

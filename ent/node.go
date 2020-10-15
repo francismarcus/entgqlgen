@@ -12,12 +12,9 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 	"github.com/facebook/ent/dialect/sql/schema"
 	"github.com/facebookincubator/ent-contrib/entgql"
-	"github.com/francismarcus/eg/ent/exercise"
-	"github.com/francismarcus/eg/ent/program"
-	"github.com/francismarcus/eg/ent/shout"
+	"github.com/francismarcus/eg/ent/diet"
 	"github.com/francismarcus/eg/ent/user"
 	"github.com/francismarcus/eg/ent/usersettings"
-	"github.com/francismarcus/eg/ent/workout"
 	"github.com/hashicorp/go-multierror"
 	"golang.org/x/sync/semaphore"
 )
@@ -49,25 +46,15 @@ type Edge struct {
 	IDs  []int  `json:"ids,omitempty"`  // node ids (where this edge point to).
 }
 
-func (e *Exercise) Node(ctx context.Context) (node *Node, err error) {
+func (d *Diet) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
-		ID:     e.ID,
-		Type:   "Exercise",
-		Fields: make([]*Field, 0),
-		Edges:  make([]*Edge, 0),
-	}
-	return node, nil
-}
-
-func (pr *Program) Node(ctx context.Context) (node *Node, err error) {
-	node = &Node{
-		ID:     pr.ID,
-		Type:   "Program",
-		Fields: make([]*Field, 3),
-		Edges:  make([]*Edge, 2),
+		ID:     d.ID,
+		Type:   "Diet",
+		Fields: make([]*Field, 5),
+		Edges:  make([]*Edge, 1),
 	}
 	var buf []byte
-	if buf, err = json.Marshal(pr.CreatedAt); err != nil {
+	if buf, err = json.Marshal(d.CreatedAt); err != nil {
 		return nil, err
 	}
 	node.Fields[0] = &Field{
@@ -75,7 +62,7 @@ func (pr *Program) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "created_at",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(pr.UpdatedAt); err != nil {
+	if buf, err = json.Marshal(d.UpdatedAt); err != nil {
 		return nil, err
 	}
 	node.Fields[1] = &Field{
@@ -83,7 +70,7 @@ func (pr *Program) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "updated_at",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(pr.Name); err != nil {
+	if buf, err = json.Marshal(d.Name); err != nil {
 		return nil, err
 	}
 	node.Fields[2] = &Field{
@@ -91,74 +78,24 @@ func (pr *Program) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "name",
 		Value: string(buf),
 	}
-	var ids []int
-	ids, err = pr.QueryAuthor().
-		Select(user.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[0] = &Edge{
-		IDs:  ids,
-		Type: "User",
-		Name: "author",
-	}
-	ids, err = pr.QueryWorkouts().
-		Select(workout.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[1] = &Edge{
-		IDs:  ids,
-		Type: "Workout",
-		Name: "workouts",
-	}
-	return node, nil
-}
-
-func (s *Shout) Node(ctx context.Context) (node *Node, err error) {
-	node = &Node{
-		ID:     s.ID,
-		Type:   "Shout",
-		Fields: make([]*Field, 4),
-		Edges:  make([]*Edge, 2),
-	}
-	var buf []byte
-	if buf, err = json.Marshal(s.CreatedAt); err != nil {
-		return nil, err
-	}
-	node.Fields[0] = &Field{
-		Type:  "time.Time",
-		Name:  "created_at",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(s.UpdatedAt); err != nil {
-		return nil, err
-	}
-	node.Fields[1] = &Field{
-		Type:  "time.Time",
-		Name:  "updated_at",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(s.Message); err != nil {
-		return nil, err
-	}
-	node.Fields[2] = &Field{
-		Type:  "string",
-		Name:  "message",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(s.Likes); err != nil {
+	if buf, err = json.Marshal(d.GoalWeight); err != nil {
 		return nil, err
 	}
 	node.Fields[3] = &Field{
 		Type:  "int",
-		Name:  "likes",
+		Name:  "goal_weight",
+		Value: string(buf),
+	}
+	if buf, err = json.Marshal(d.Length); err != nil {
+		return nil, err
+	}
+	node.Fields[4] = &Field{
+		Type:  "int",
+		Name:  "length",
 		Value: string(buf),
 	}
 	var ids []int
-	ids, err = s.QueryAuthor().
+	ids, err = d.QueryAuthor().
 		Select(user.FieldID).
 		Ints(ctx)
 	if err != nil {
@@ -168,17 +105,6 @@ func (s *Shout) Node(ctx context.Context) (node *Node, err error) {
 		IDs:  ids,
 		Type: "User",
 		Name: "author",
-	}
-	ids, err = s.QueryLikedBy().
-		Select(user.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[1] = &Edge{
-		IDs:  ids,
-		Type: "User",
-		Name: "liked_by",
 	}
 	return node, nil
 }
@@ -187,8 +113,8 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 	node = &Node{
 		ID:     u.ID,
 		Type:   "User",
-		Fields: make([]*Field, 8),
-		Edges:  make([]*Edge, 6),
+		Fields: make([]*Field, 5),
+		Edges:  make([]*Edge, 2),
 	}
 	var buf []byte
 	if buf, err = json.Marshal(u.CreatedAt); err != nil {
@@ -231,96 +157,28 @@ func (u *User) Node(ctx context.Context) (node *Node, err error) {
 		Name:  "password",
 		Value: string(buf),
 	}
-	if buf, err = json.Marshal(u.FollowsCount); err != nil {
-		return nil, err
-	}
-	node.Fields[5] = &Field{
-		Type:  "int",
-		Name:  "follows_count",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(u.FollowersCount); err != nil {
-		return nil, err
-	}
-	node.Fields[6] = &Field{
-		Type:  "int",
-		Name:  "followers_count",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(u.ShoutsCount); err != nil {
-		return nil, err
-	}
-	node.Fields[7] = &Field{
-		Type:  "int",
-		Name:  "shouts_count",
-		Value: string(buf),
-	}
 	var ids []int
-	ids, err = u.QueryFollowers().
-		Select(user.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[0] = &Edge{
-		IDs:  ids,
-		Type: "User",
-		Name: "followers",
-	}
-	ids, err = u.QueryFollowing().
-		Select(user.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[1] = &Edge{
-		IDs:  ids,
-		Type: "User",
-		Name: "following",
-	}
-	ids, err = u.QueryPrograms().
-		Select(program.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[2] = &Edge{
-		IDs:  ids,
-		Type: "Program",
-		Name: "programs",
-	}
-	ids, err = u.QueryShouts().
-		Select(shout.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[3] = &Edge{
-		IDs:  ids,
-		Type: "Shout",
-		Name: "shouts",
-	}
-	ids, err = u.QueryLikedShouts().
-		Select(shout.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[4] = &Edge{
-		IDs:  ids,
-		Type: "Shout",
-		Name: "liked_shouts",
-	}
 	ids, err = u.QuerySettings().
 		Select(usersettings.FieldID).
 		Ints(ctx)
 	if err != nil {
 		return nil, err
 	}
-	node.Edges[5] = &Edge{
+	node.Edges[0] = &Edge{
 		IDs:  ids,
 		Type: "UserSettings",
 		Name: "settings",
+	}
+	ids, err = u.QueryDiets().
+		Select(diet.FieldID).
+		Ints(ctx)
+	if err != nil {
+		return nil, err
+	}
+	node.Edges[1] = &Edge{
+		IDs:  ids,
+		Type: "Diet",
+		Name: "diets",
 	}
 	return node, nil
 }
@@ -388,53 +246,6 @@ func (us *UserSettings) Node(ctx context.Context) (node *Node, err error) {
 	return node, nil
 }
 
-func (w *Workout) Node(ctx context.Context) (node *Node, err error) {
-	node = &Node{
-		ID:     w.ID,
-		Type:   "Workout",
-		Fields: make([]*Field, 3),
-		Edges:  make([]*Edge, 1),
-	}
-	var buf []byte
-	if buf, err = json.Marshal(w.CreatedAt); err != nil {
-		return nil, err
-	}
-	node.Fields[0] = &Field{
-		Type:  "time.Time",
-		Name:  "created_at",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(w.UpdatedAt); err != nil {
-		return nil, err
-	}
-	node.Fields[1] = &Field{
-		Type:  "time.Time",
-		Name:  "updated_at",
-		Value: string(buf),
-	}
-	if buf, err = json.Marshal(w.Name); err != nil {
-		return nil, err
-	}
-	node.Fields[2] = &Field{
-		Type:  "string",
-		Name:  "name",
-		Value: string(buf),
-	}
-	var ids []int
-	ids, err = w.QueryProgram().
-		Select(program.FieldID).
-		Ints(ctx)
-	if err != nil {
-		return nil, err
-	}
-	node.Edges[0] = &Edge{
-		IDs:  ids,
-		Type: "Program",
-		Name: "program",
-	}
-	return node, nil
-}
-
 func (c *Client) Node(ctx context.Context, id int) (*Node, error) {
 	n, err := c.Noder(ctx, id)
 	if err != nil {
@@ -464,28 +275,10 @@ func (c *Client) Noder(ctx context.Context, id int) (_ Noder, err error) {
 
 func (c *Client) noder(ctx context.Context, tbl string, id int) (Noder, error) {
 	switch tbl {
-	case exercise.Table:
-		n, err := c.Exercise.Query().
-			Where(exercise.ID(id)).
-			CollectFields(ctx, "Exercise").
-			Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case program.Table:
-		n, err := c.Program.Query().
-			Where(program.ID(id)).
-			CollectFields(ctx, "Program").
-			Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case shout.Table:
-		n, err := c.Shout.Query().
-			Where(shout.ID(id)).
-			CollectFields(ctx, "Shout").
+	case diet.Table:
+		n, err := c.Diet.Query().
+			Where(diet.ID(id)).
+			CollectFields(ctx, "Diet").
 			Only(ctx)
 		if err != nil {
 			return nil, err
@@ -504,15 +297,6 @@ func (c *Client) noder(ctx context.Context, tbl string, id int) (Noder, error) {
 		n, err := c.UserSettings.Query().
 			Where(usersettings.ID(id)).
 			CollectFields(ctx, "UserSettings").
-			Only(ctx)
-		if err != nil {
-			return nil, err
-		}
-		return n, nil
-	case workout.Table:
-		n, err := c.Workout.Query().
-			Where(workout.ID(id)).
-			CollectFields(ctx, "Workout").
 			Only(ctx)
 		if err != nil {
 			return nil, err

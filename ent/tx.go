@@ -12,18 +12,12 @@ import (
 // Tx is a transactional client that is created by calling Client.Tx().
 type Tx struct {
 	config
-	// Exercise is the client for interacting with the Exercise builders.
-	Exercise *ExerciseClient
-	// Program is the client for interacting with the Program builders.
-	Program *ProgramClient
-	// Shout is the client for interacting with the Shout builders.
-	Shout *ShoutClient
+	// Diet is the client for interacting with the Diet builders.
+	Diet *DietClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserSettings is the client for interacting with the UserSettings builders.
 	UserSettings *UserSettingsClient
-	// Workout is the client for interacting with the Workout builders.
-	Workout *WorkoutClient
 
 	// lazily loaded.
 	client     *Client
@@ -159,12 +153,9 @@ func (tx *Tx) Client() *Client {
 }
 
 func (tx *Tx) init() {
-	tx.Exercise = NewExerciseClient(tx.config)
-	tx.Program = NewProgramClient(tx.config)
-	tx.Shout = NewShoutClient(tx.config)
+	tx.Diet = NewDietClient(tx.config)
 	tx.User = NewUserClient(tx.config)
 	tx.UserSettings = NewUserSettingsClient(tx.config)
-	tx.Workout = NewWorkoutClient(tx.config)
 }
 
 // txDriver wraps the given dialect.Tx with a nop dialect.Driver implementation.
@@ -174,7 +165,7 @@ func (tx *Tx) init() {
 // of them in order to commit or rollback the transaction.
 //
 // If a closed transaction is embedded in one of the generated entities, and the entity
-// applies a query, for example: Exercise.QueryXXX(), the query will be executed
+// applies a query, for example: Diet.QueryXXX(), the query will be executed
 // through the driver which created this transaction.
 //
 // Note that txDriver is not goroutine safe.

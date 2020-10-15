@@ -9,12 +9,9 @@ import (
 
 	"github.com/francismarcus/eg/ent/migrate"
 
-	"github.com/francismarcus/eg/ent/exercise"
-	"github.com/francismarcus/eg/ent/program"
-	"github.com/francismarcus/eg/ent/shout"
+	"github.com/francismarcus/eg/ent/diet"
 	"github.com/francismarcus/eg/ent/user"
 	"github.com/francismarcus/eg/ent/usersettings"
-	"github.com/francismarcus/eg/ent/workout"
 
 	"github.com/facebook/ent/dialect"
 	"github.com/facebook/ent/dialect/sql"
@@ -26,18 +23,12 @@ type Client struct {
 	config
 	// Schema is the client for creating, migrating and dropping schema.
 	Schema *migrate.Schema
-	// Exercise is the client for interacting with the Exercise builders.
-	Exercise *ExerciseClient
-	// Program is the client for interacting with the Program builders.
-	Program *ProgramClient
-	// Shout is the client for interacting with the Shout builders.
-	Shout *ShoutClient
+	// Diet is the client for interacting with the Diet builders.
+	Diet *DietClient
 	// User is the client for interacting with the User builders.
 	User *UserClient
 	// UserSettings is the client for interacting with the UserSettings builders.
 	UserSettings *UserSettingsClient
-	// Workout is the client for interacting with the Workout builders.
-	Workout *WorkoutClient
 
 	// additional fields for node api
 	tables tables
@@ -54,12 +45,9 @@ func NewClient(opts ...Option) *Client {
 
 func (c *Client) init() {
 	c.Schema = migrate.NewSchema(c.driver)
-	c.Exercise = NewExerciseClient(c.config)
-	c.Program = NewProgramClient(c.config)
-	c.Shout = NewShoutClient(c.config)
+	c.Diet = NewDietClient(c.config)
 	c.User = NewUserClient(c.config)
 	c.UserSettings = NewUserSettingsClient(c.config)
-	c.Workout = NewWorkoutClient(c.config)
 }
 
 // Open opens a database/sql.DB specified by the driver name and
@@ -92,12 +80,9 @@ func (c *Client) Tx(ctx context.Context) (*Tx, error) {
 	return &Tx{
 		ctx:          ctx,
 		config:       cfg,
-		Exercise:     NewExerciseClient(cfg),
-		Program:      NewProgramClient(cfg),
-		Shout:        NewShoutClient(cfg),
+		Diet:         NewDietClient(cfg),
 		User:         NewUserClient(cfg),
 		UserSettings: NewUserSettingsClient(cfg),
-		Workout:      NewWorkoutClient(cfg),
 	}, nil
 }
 
@@ -113,19 +98,16 @@ func (c *Client) BeginTx(ctx context.Context, opts *sql.TxOptions) (*Tx, error) 
 	cfg := config{driver: &txDriver{tx: tx, drv: c.driver}, log: c.log, debug: c.debug, hooks: c.hooks}
 	return &Tx{
 		config:       cfg,
-		Exercise:     NewExerciseClient(cfg),
-		Program:      NewProgramClient(cfg),
-		Shout:        NewShoutClient(cfg),
+		Diet:         NewDietClient(cfg),
 		User:         NewUserClient(cfg),
 		UserSettings: NewUserSettingsClient(cfg),
-		Workout:      NewWorkoutClient(cfg),
 	}, nil
 }
 
 // Debug returns a new debug-client. It's used to get verbose logging on specific operations.
 //
 //	client.Debug().
-//		Exercise.
+//		Diet.
 //		Query().
 //		Count(ctx)
 //
@@ -147,90 +129,87 @@ func (c *Client) Close() error {
 // Use adds the mutation hooks to all the entity clients.
 // In order to add hooks to a specific client, call: `client.Node.Use(...)`.
 func (c *Client) Use(hooks ...Hook) {
-	c.Exercise.Use(hooks...)
-	c.Program.Use(hooks...)
-	c.Shout.Use(hooks...)
+	c.Diet.Use(hooks...)
 	c.User.Use(hooks...)
 	c.UserSettings.Use(hooks...)
-	c.Workout.Use(hooks...)
 }
 
-// ExerciseClient is a client for the Exercise schema.
-type ExerciseClient struct {
+// DietClient is a client for the Diet schema.
+type DietClient struct {
 	config
 }
 
-// NewExerciseClient returns a client for the Exercise from the given config.
-func NewExerciseClient(c config) *ExerciseClient {
-	return &ExerciseClient{config: c}
+// NewDietClient returns a client for the Diet from the given config.
+func NewDietClient(c config) *DietClient {
+	return &DietClient{config: c}
 }
 
 // Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `exercise.Hooks(f(g(h())))`.
-func (c *ExerciseClient) Use(hooks ...Hook) {
-	c.hooks.Exercise = append(c.hooks.Exercise, hooks...)
+// A call to `Use(f, g, h)` equals to `diet.Hooks(f(g(h())))`.
+func (c *DietClient) Use(hooks ...Hook) {
+	c.hooks.Diet = append(c.hooks.Diet, hooks...)
 }
 
-// Create returns a create builder for Exercise.
-func (c *ExerciseClient) Create() *ExerciseCreate {
-	mutation := newExerciseMutation(c.config, OpCreate)
-	return &ExerciseCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Create returns a create builder for Diet.
+func (c *DietClient) Create() *DietCreate {
+	mutation := newDietMutation(c.config, OpCreate)
+	return &DietCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// BulkCreate returns a builder for creating a bulk of Exercise entities.
-func (c *ExerciseClient) CreateBulk(builders ...*ExerciseCreate) *ExerciseCreateBulk {
-	return &ExerciseCreateBulk{config: c.config, builders: builders}
+// BulkCreate returns a builder for creating a bulk of Diet entities.
+func (c *DietClient) CreateBulk(builders ...*DietCreate) *DietCreateBulk {
+	return &DietCreateBulk{config: c.config, builders: builders}
 }
 
-// Update returns an update builder for Exercise.
-func (c *ExerciseClient) Update() *ExerciseUpdate {
-	mutation := newExerciseMutation(c.config, OpUpdate)
-	return &ExerciseUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Update returns an update builder for Diet.
+func (c *DietClient) Update() *DietUpdate {
+	mutation := newDietMutation(c.config, OpUpdate)
+	return &DietUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOne returns an update builder for the given entity.
-func (c *ExerciseClient) UpdateOne(e *Exercise) *ExerciseUpdateOne {
-	mutation := newExerciseMutation(c.config, OpUpdateOne, withExercise(e))
-	return &ExerciseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DietClient) UpdateOne(d *Diet) *DietUpdateOne {
+	mutation := newDietMutation(c.config, OpUpdateOne, withDiet(d))
+	return &DietUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // UpdateOneID returns an update builder for the given id.
-func (c *ExerciseClient) UpdateOneID(id int) *ExerciseUpdateOne {
-	mutation := newExerciseMutation(c.config, OpUpdateOne, withExerciseID(id))
-	return &ExerciseUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
+func (c *DietClient) UpdateOneID(id int) *DietUpdateOne {
+	mutation := newDietMutation(c.config, OpUpdateOne, withDietID(id))
+	return &DietUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
-// Delete returns a delete builder for Exercise.
-func (c *ExerciseClient) Delete() *ExerciseDelete {
-	mutation := newExerciseMutation(c.config, OpDelete)
-	return &ExerciseDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
+// Delete returns a delete builder for Diet.
+func (c *DietClient) Delete() *DietDelete {
+	mutation := newDietMutation(c.config, OpDelete)
+	return &DietDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
 }
 
 // DeleteOne returns a delete builder for the given entity.
-func (c *ExerciseClient) DeleteOne(e *Exercise) *ExerciseDeleteOne {
-	return c.DeleteOneID(e.ID)
+func (c *DietClient) DeleteOne(d *Diet) *DietDeleteOne {
+	return c.DeleteOneID(d.ID)
 }
 
 // DeleteOneID returns a delete builder for the given id.
-func (c *ExerciseClient) DeleteOneID(id int) *ExerciseDeleteOne {
-	builder := c.Delete().Where(exercise.ID(id))
+func (c *DietClient) DeleteOneID(id int) *DietDeleteOne {
+	builder := c.Delete().Where(diet.ID(id))
 	builder.mutation.id = &id
 	builder.mutation.op = OpDeleteOne
-	return &ExerciseDeleteOne{builder}
+	return &DietDeleteOne{builder}
 }
 
-// Query returns a query builder for Exercise.
-func (c *ExerciseClient) Query() *ExerciseQuery {
-	return &ExerciseQuery{config: c.config}
+// Query returns a query builder for Diet.
+func (c *DietClient) Query() *DietQuery {
+	return &DietQuery{config: c.config}
 }
 
-// Get returns a Exercise entity by its id.
-func (c *ExerciseClient) Get(ctx context.Context, id int) (*Exercise, error) {
-	return c.Query().Where(exercise.ID(id)).Only(ctx)
+// Get returns a Diet entity by its id.
+func (c *DietClient) Get(ctx context.Context, id int) (*Diet, error) {
+	return c.Query().Where(diet.ID(id)).Only(ctx)
 }
 
 // GetX is like Get, but panics if an error occurs.
-func (c *ExerciseClient) GetX(ctx context.Context, id int) *Exercise {
+func (c *DietClient) GetX(ctx context.Context, id int) *Diet {
 	obj, err := c.Get(ctx, id)
 	if err != nil {
 		panic(err)
@@ -238,249 +217,25 @@ func (c *ExerciseClient) GetX(ctx context.Context, id int) *Exercise {
 	return obj
 }
 
-// Hooks returns the client hooks.
-func (c *ExerciseClient) Hooks() []Hook {
-	return c.hooks.Exercise
-}
-
-// ProgramClient is a client for the Program schema.
-type ProgramClient struct {
-	config
-}
-
-// NewProgramClient returns a client for the Program from the given config.
-func NewProgramClient(c config) *ProgramClient {
-	return &ProgramClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `program.Hooks(f(g(h())))`.
-func (c *ProgramClient) Use(hooks ...Hook) {
-	c.hooks.Program = append(c.hooks.Program, hooks...)
-}
-
-// Create returns a create builder for Program.
-func (c *ProgramClient) Create() *ProgramCreate {
-	mutation := newProgramMutation(c.config, OpCreate)
-	return &ProgramCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// BulkCreate returns a builder for creating a bulk of Program entities.
-func (c *ProgramClient) CreateBulk(builders ...*ProgramCreate) *ProgramCreateBulk {
-	return &ProgramCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Program.
-func (c *ProgramClient) Update() *ProgramUpdate {
-	mutation := newProgramMutation(c.config, OpUpdate)
-	return &ProgramUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *ProgramClient) UpdateOne(pr *Program) *ProgramUpdateOne {
-	mutation := newProgramMutation(c.config, OpUpdateOne, withProgram(pr))
-	return &ProgramUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *ProgramClient) UpdateOneID(id int) *ProgramUpdateOne {
-	mutation := newProgramMutation(c.config, OpUpdateOne, withProgramID(id))
-	return &ProgramUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Program.
-func (c *ProgramClient) Delete() *ProgramDelete {
-	mutation := newProgramMutation(c.config, OpDelete)
-	return &ProgramDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *ProgramClient) DeleteOne(pr *Program) *ProgramDeleteOne {
-	return c.DeleteOneID(pr.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *ProgramClient) DeleteOneID(id int) *ProgramDeleteOne {
-	builder := c.Delete().Where(program.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &ProgramDeleteOne{builder}
-}
-
-// Query returns a query builder for Program.
-func (c *ProgramClient) Query() *ProgramQuery {
-	return &ProgramQuery{config: c.config}
-}
-
-// Get returns a Program entity by its id.
-func (c *ProgramClient) Get(ctx context.Context, id int) (*Program, error) {
-	return c.Query().Where(program.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *ProgramClient) GetX(ctx context.Context, id int) *Program {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryAuthor queries the author edge of a Program.
-func (c *ProgramClient) QueryAuthor(pr *Program) *UserQuery {
+// QueryAuthor queries the author edge of a Diet.
+func (c *DietClient) QueryAuthor(d *Diet) *UserQuery {
 	query := &UserQuery{config: c.config}
 	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := pr.ID
+		id := d.ID
 		step := sqlgraph.NewStep(
-			sqlgraph.From(program.Table, program.FieldID, id),
+			sqlgraph.From(diet.Table, diet.FieldID, id),
 			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, program.AuthorTable, program.AuthorColumn),
+			sqlgraph.Edge(sqlgraph.M2O, true, diet.AuthorTable, diet.AuthorColumn),
 		)
-		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryWorkouts queries the workouts edge of a Program.
-func (c *ProgramClient) QueryWorkouts(pr *Program) *WorkoutQuery {
-	query := &WorkoutQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := pr.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(program.Table, program.FieldID, id),
-			sqlgraph.To(workout.Table, workout.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, program.WorkoutsTable, program.WorkoutsColumn),
-		)
-		fromV = sqlgraph.Neighbors(pr.driver.Dialect(), step)
+		fromV = sqlgraph.Neighbors(d.driver.Dialect(), step)
 		return fromV, nil
 	}
 	return query
 }
 
 // Hooks returns the client hooks.
-func (c *ProgramClient) Hooks() []Hook {
-	return c.hooks.Program
-}
-
-// ShoutClient is a client for the Shout schema.
-type ShoutClient struct {
-	config
-}
-
-// NewShoutClient returns a client for the Shout from the given config.
-func NewShoutClient(c config) *ShoutClient {
-	return &ShoutClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `shout.Hooks(f(g(h())))`.
-func (c *ShoutClient) Use(hooks ...Hook) {
-	c.hooks.Shout = append(c.hooks.Shout, hooks...)
-}
-
-// Create returns a create builder for Shout.
-func (c *ShoutClient) Create() *ShoutCreate {
-	mutation := newShoutMutation(c.config, OpCreate)
-	return &ShoutCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// BulkCreate returns a builder for creating a bulk of Shout entities.
-func (c *ShoutClient) CreateBulk(builders ...*ShoutCreate) *ShoutCreateBulk {
-	return &ShoutCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Shout.
-func (c *ShoutClient) Update() *ShoutUpdate {
-	mutation := newShoutMutation(c.config, OpUpdate)
-	return &ShoutUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *ShoutClient) UpdateOne(s *Shout) *ShoutUpdateOne {
-	mutation := newShoutMutation(c.config, OpUpdateOne, withShout(s))
-	return &ShoutUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *ShoutClient) UpdateOneID(id int) *ShoutUpdateOne {
-	mutation := newShoutMutation(c.config, OpUpdateOne, withShoutID(id))
-	return &ShoutUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Shout.
-func (c *ShoutClient) Delete() *ShoutDelete {
-	mutation := newShoutMutation(c.config, OpDelete)
-	return &ShoutDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *ShoutClient) DeleteOne(s *Shout) *ShoutDeleteOne {
-	return c.DeleteOneID(s.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *ShoutClient) DeleteOneID(id int) *ShoutDeleteOne {
-	builder := c.Delete().Where(shout.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &ShoutDeleteOne{builder}
-}
-
-// Query returns a query builder for Shout.
-func (c *ShoutClient) Query() *ShoutQuery {
-	return &ShoutQuery{config: c.config}
-}
-
-// Get returns a Shout entity by its id.
-func (c *ShoutClient) Get(ctx context.Context, id int) (*Shout, error) {
-	return c.Query().Where(shout.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *ShoutClient) GetX(ctx context.Context, id int) *Shout {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryAuthor queries the author edge of a Shout.
-func (c *ShoutClient) QueryAuthor(s *Shout) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(shout.Table, shout.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, shout.AuthorTable, shout.AuthorColumn),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryLikedBy queries the liked_by edge of a Shout.
-func (c *ShoutClient) QueryLikedBy(s *Shout) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := s.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(shout.Table, shout.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, shout.LikedByTable, shout.LikedByPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(s.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *ShoutClient) Hooks() []Hook {
-	return c.hooks.Shout
+func (c *DietClient) Hooks() []Hook {
+	return c.hooks.Diet
 }
 
 // UserClient is a client for the User schema.
@@ -566,86 +321,6 @@ func (c *UserClient) GetX(ctx context.Context, id int) *User {
 	return obj
 }
 
-// QueryFollowers queries the followers edge of a User.
-func (c *UserClient) QueryFollowers(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, user.FollowersTable, user.FollowersPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryFollowing queries the following edge of a User.
-func (c *UserClient) QueryFollowing(u *User) *UserQuery {
-	query := &UserQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(user.Table, user.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, user.FollowingTable, user.FollowingPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryPrograms queries the programs edge of a User.
-func (c *UserClient) QueryPrograms(u *User) *ProgramQuery {
-	query := &ProgramQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(program.Table, program.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.ProgramsTable, user.ProgramsColumn),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryShouts queries the shouts edge of a User.
-func (c *UserClient) QueryShouts(u *User) *ShoutQuery {
-	query := &ShoutQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(shout.Table, shout.FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, user.ShoutsTable, user.ShoutsColumn),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// QueryLikedShouts queries the liked_shouts edge of a User.
-func (c *UserClient) QueryLikedShouts(u *User) *ShoutQuery {
-	query := &ShoutQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := u.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(user.Table, user.FieldID, id),
-			sqlgraph.To(shout.Table, shout.FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, user.LikedShoutsTable, user.LikedShoutsPrimaryKey...),
-		)
-		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
 // QuerySettings queries the settings edge of a User.
 func (c *UserClient) QuerySettings(u *User) *UserSettingsQuery {
 	query := &UserSettingsQuery{config: c.config}
@@ -655,6 +330,22 @@ func (c *UserClient) QuerySettings(u *User) *UserSettingsQuery {
 			sqlgraph.From(user.Table, user.FieldID, id),
 			sqlgraph.To(usersettings.Table, usersettings.FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, user.SettingsTable, user.SettingsColumn),
+		)
+		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
+		return fromV, nil
+	}
+	return query
+}
+
+// QueryDiets queries the diets edge of a User.
+func (c *UserClient) QueryDiets(u *User) *DietQuery {
+	query := &DietQuery{config: c.config}
+	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
+		id := u.ID
+		step := sqlgraph.NewStep(
+			sqlgraph.From(user.Table, user.FieldID, id),
+			sqlgraph.To(diet.Table, diet.FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, user.DietsTable, user.DietsColumn),
 		)
 		fromV = sqlgraph.Neighbors(u.driver.Dialect(), step)
 		return fromV, nil
@@ -769,108 +460,4 @@ func (c *UserSettingsClient) QueryBelongsTo(us *UserSettings) *UserQuery {
 // Hooks returns the client hooks.
 func (c *UserSettingsClient) Hooks() []Hook {
 	return c.hooks.UserSettings
-}
-
-// WorkoutClient is a client for the Workout schema.
-type WorkoutClient struct {
-	config
-}
-
-// NewWorkoutClient returns a client for the Workout from the given config.
-func NewWorkoutClient(c config) *WorkoutClient {
-	return &WorkoutClient{config: c}
-}
-
-// Use adds a list of mutation hooks to the hooks stack.
-// A call to `Use(f, g, h)` equals to `workout.Hooks(f(g(h())))`.
-func (c *WorkoutClient) Use(hooks ...Hook) {
-	c.hooks.Workout = append(c.hooks.Workout, hooks...)
-}
-
-// Create returns a create builder for Workout.
-func (c *WorkoutClient) Create() *WorkoutCreate {
-	mutation := newWorkoutMutation(c.config, OpCreate)
-	return &WorkoutCreate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// BulkCreate returns a builder for creating a bulk of Workout entities.
-func (c *WorkoutClient) CreateBulk(builders ...*WorkoutCreate) *WorkoutCreateBulk {
-	return &WorkoutCreateBulk{config: c.config, builders: builders}
-}
-
-// Update returns an update builder for Workout.
-func (c *WorkoutClient) Update() *WorkoutUpdate {
-	mutation := newWorkoutMutation(c.config, OpUpdate)
-	return &WorkoutUpdate{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOne returns an update builder for the given entity.
-func (c *WorkoutClient) UpdateOne(w *Workout) *WorkoutUpdateOne {
-	mutation := newWorkoutMutation(c.config, OpUpdateOne, withWorkout(w))
-	return &WorkoutUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// UpdateOneID returns an update builder for the given id.
-func (c *WorkoutClient) UpdateOneID(id int) *WorkoutUpdateOne {
-	mutation := newWorkoutMutation(c.config, OpUpdateOne, withWorkoutID(id))
-	return &WorkoutUpdateOne{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// Delete returns a delete builder for Workout.
-func (c *WorkoutClient) Delete() *WorkoutDelete {
-	mutation := newWorkoutMutation(c.config, OpDelete)
-	return &WorkoutDelete{config: c.config, hooks: c.Hooks(), mutation: mutation}
-}
-
-// DeleteOne returns a delete builder for the given entity.
-func (c *WorkoutClient) DeleteOne(w *Workout) *WorkoutDeleteOne {
-	return c.DeleteOneID(w.ID)
-}
-
-// DeleteOneID returns a delete builder for the given id.
-func (c *WorkoutClient) DeleteOneID(id int) *WorkoutDeleteOne {
-	builder := c.Delete().Where(workout.ID(id))
-	builder.mutation.id = &id
-	builder.mutation.op = OpDeleteOne
-	return &WorkoutDeleteOne{builder}
-}
-
-// Query returns a query builder for Workout.
-func (c *WorkoutClient) Query() *WorkoutQuery {
-	return &WorkoutQuery{config: c.config}
-}
-
-// Get returns a Workout entity by its id.
-func (c *WorkoutClient) Get(ctx context.Context, id int) (*Workout, error) {
-	return c.Query().Where(workout.ID(id)).Only(ctx)
-}
-
-// GetX is like Get, but panics if an error occurs.
-func (c *WorkoutClient) GetX(ctx context.Context, id int) *Workout {
-	obj, err := c.Get(ctx, id)
-	if err != nil {
-		panic(err)
-	}
-	return obj
-}
-
-// QueryProgram queries the program edge of a Workout.
-func (c *WorkoutClient) QueryProgram(w *Workout) *ProgramQuery {
-	query := &ProgramQuery{config: c.config}
-	query.path = func(ctx context.Context) (fromV *sql.Selector, _ error) {
-		id := w.ID
-		step := sqlgraph.NewStep(
-			sqlgraph.From(workout.Table, workout.FieldID, id),
-			sqlgraph.To(program.Table, program.FieldID),
-			sqlgraph.Edge(sqlgraph.M2O, true, workout.ProgramTable, workout.ProgramColumn),
-		)
-		fromV = sqlgraph.Neighbors(w.driver.Dialect(), step)
-		return fromV, nil
-	}
-	return query
-}
-
-// Hooks returns the client hooks.
-func (c *WorkoutClient) Hooks() []Hook {
-	return c.hooks.Workout
 }

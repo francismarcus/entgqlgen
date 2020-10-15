@@ -9,13 +9,13 @@ import (
 	"github.com/facebookincubator/ent-contrib/entgql"
 )
 
-// Program holds the schema definition for the Program entity.
-type Program struct {
+// Diet holds the schema definition for the Diet entity.
+type Diet struct {
 	ent.Schema
 }
 
-// Fields of the Program.
-func (Program) Fields() []ent.Field {
+// Fields of the Diet.
+func (Diet) Fields() []ent.Field {
 	return []ent.Field{
 		field.Time("created_at").
 			Default(time.Now).
@@ -30,15 +30,20 @@ func (Program) Fields() []ent.Field {
 				entgql.OrderField("UPDATED_AT"),
 			),
 		field.String("name"),
+		field.Int("goal_weight"),
+		field.Int("length"),
 	}
 }
 
-// Edges of the Program.
-func (Program) Edges() []ent.Edge {
+// Edges of the Diet.
+func (Diet) Edges() []ent.Edge {
 	return []ent.Edge{
 		edge.From("author", User.Type).
-			Ref("programs").
-			Unique(),
-		edge.To("workouts", Workout.Type),
+			Ref("diets").
+			Unique().
+			// We add the "Required" method to the builder
+			// to make this edge required on entity creation.
+			// i.e. Settings cannot be created without its User.
+			Required(),
 	}
 }

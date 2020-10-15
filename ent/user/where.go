@@ -128,27 +128,6 @@ func Password(v string) predicate.User {
 	})
 }
 
-// FollowsCount applies equality check predicate on the "follows_count" field. It's identical to FollowsCountEQ.
-func FollowsCount(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFollowsCount), v))
-	})
-}
-
-// FollowersCount applies equality check predicate on the "followers_count" field. It's identical to FollowersCountEQ.
-func FollowersCount(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFollowersCount), v))
-	})
-}
-
-// ShoutsCount applies equality check predicate on the "shouts_count" field. It's identical to ShoutsCountEQ.
-func ShoutsCount(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldShoutsCount), v))
-	})
-}
-
 // CreatedAtEQ applies the EQ predicate on the "created_at" field.
 func CreatedAtEQ(v time.Time) predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -634,374 +613,6 @@ func PasswordContainsFold(v string) predicate.User {
 	})
 }
 
-// FollowsCountEQ applies the EQ predicate on the "follows_count" field.
-func FollowsCountEQ(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFollowsCount), v))
-	})
-}
-
-// FollowsCountNEQ applies the NEQ predicate on the "follows_count" field.
-func FollowsCountNEQ(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldFollowsCount), v))
-	})
-}
-
-// FollowsCountIn applies the In predicate on the "follows_count" field.
-func FollowsCountIn(vs ...int) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldFollowsCount), v...))
-	})
-}
-
-// FollowsCountNotIn applies the NotIn predicate on the "follows_count" field.
-func FollowsCountNotIn(vs ...int) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldFollowsCount), v...))
-	})
-}
-
-// FollowsCountGT applies the GT predicate on the "follows_count" field.
-func FollowsCountGT(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldFollowsCount), v))
-	})
-}
-
-// FollowsCountGTE applies the GTE predicate on the "follows_count" field.
-func FollowsCountGTE(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldFollowsCount), v))
-	})
-}
-
-// FollowsCountLT applies the LT predicate on the "follows_count" field.
-func FollowsCountLT(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldFollowsCount), v))
-	})
-}
-
-// FollowsCountLTE applies the LTE predicate on the "follows_count" field.
-func FollowsCountLTE(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldFollowsCount), v))
-	})
-}
-
-// FollowersCountEQ applies the EQ predicate on the "followers_count" field.
-func FollowersCountEQ(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldFollowersCount), v))
-	})
-}
-
-// FollowersCountNEQ applies the NEQ predicate on the "followers_count" field.
-func FollowersCountNEQ(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldFollowersCount), v))
-	})
-}
-
-// FollowersCountIn applies the In predicate on the "followers_count" field.
-func FollowersCountIn(vs ...int) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldFollowersCount), v...))
-	})
-}
-
-// FollowersCountNotIn applies the NotIn predicate on the "followers_count" field.
-func FollowersCountNotIn(vs ...int) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldFollowersCount), v...))
-	})
-}
-
-// FollowersCountGT applies the GT predicate on the "followers_count" field.
-func FollowersCountGT(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldFollowersCount), v))
-	})
-}
-
-// FollowersCountGTE applies the GTE predicate on the "followers_count" field.
-func FollowersCountGTE(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldFollowersCount), v))
-	})
-}
-
-// FollowersCountLT applies the LT predicate on the "followers_count" field.
-func FollowersCountLT(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldFollowersCount), v))
-	})
-}
-
-// FollowersCountLTE applies the LTE predicate on the "followers_count" field.
-func FollowersCountLTE(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldFollowersCount), v))
-	})
-}
-
-// ShoutsCountEQ applies the EQ predicate on the "shouts_count" field.
-func ShoutsCountEQ(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.EQ(s.C(FieldShoutsCount), v))
-	})
-}
-
-// ShoutsCountNEQ applies the NEQ predicate on the "shouts_count" field.
-func ShoutsCountNEQ(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.NEQ(s.C(FieldShoutsCount), v))
-	})
-}
-
-// ShoutsCountIn applies the In predicate on the "shouts_count" field.
-func ShoutsCountIn(vs ...int) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.In(s.C(FieldShoutsCount), v...))
-	})
-}
-
-// ShoutsCountNotIn applies the NotIn predicate on the "shouts_count" field.
-func ShoutsCountNotIn(vs ...int) predicate.User {
-	v := make([]interface{}, len(vs))
-	for i := range v {
-		v[i] = vs[i]
-	}
-	return predicate.User(func(s *sql.Selector) {
-		// if not arguments were provided, append the FALSE constants,
-		// since we can't apply "IN ()". This will make this predicate falsy.
-		if len(v) == 0 {
-			s.Where(sql.False())
-			return
-		}
-		s.Where(sql.NotIn(s.C(FieldShoutsCount), v...))
-	})
-}
-
-// ShoutsCountGT applies the GT predicate on the "shouts_count" field.
-func ShoutsCountGT(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GT(s.C(FieldShoutsCount), v))
-	})
-}
-
-// ShoutsCountGTE applies the GTE predicate on the "shouts_count" field.
-func ShoutsCountGTE(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.GTE(s.C(FieldShoutsCount), v))
-	})
-}
-
-// ShoutsCountLT applies the LT predicate on the "shouts_count" field.
-func ShoutsCountLT(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LT(s.C(FieldShoutsCount), v))
-	})
-}
-
-// ShoutsCountLTE applies the LTE predicate on the "shouts_count" field.
-func ShoutsCountLTE(v int) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		s.Where(sql.LTE(s.C(FieldShoutsCount), v))
-	})
-}
-
-// HasFollowers applies the HasEdge predicate on the "followers" edge.
-func HasFollowers() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FollowersTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, FollowersTable, FollowersPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasFollowersWith applies the HasEdge predicate on the "followers" edge with a given conditions (other predicates).
-func HasFollowersWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, FollowersTable, FollowersPrimaryKey...),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasFollowing applies the HasEdge predicate on the "following" edge.
-func HasFollowing() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(FollowingTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, FollowingTable, FollowingPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasFollowingWith applies the HasEdge predicate on the "following" edge with a given conditions (other predicates).
-func HasFollowingWith(preds ...predicate.User) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(Table, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, false, FollowingTable, FollowingPrimaryKey...),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasPrograms applies the HasEdge predicate on the "programs" edge.
-func HasPrograms() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ProgramsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ProgramsTable, ProgramsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasProgramsWith applies the HasEdge predicate on the "programs" edge with a given conditions (other predicates).
-func HasProgramsWith(preds ...predicate.Program) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ProgramsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ProgramsTable, ProgramsColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasShouts applies the HasEdge predicate on the "shouts" edge.
-func HasShouts() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ShoutsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ShoutsTable, ShoutsColumn),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasShoutsWith applies the HasEdge predicate on the "shouts" edge with a given conditions (other predicates).
-func HasShoutsWith(preds ...predicate.Shout) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(ShoutsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.O2M, false, ShoutsTable, ShoutsColumn),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
-// HasLikedShouts applies the HasEdge predicate on the "liked_shouts" edge.
-func HasLikedShouts() predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LikedShoutsTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, LikedShoutsTable, LikedShoutsPrimaryKey...),
-		)
-		sqlgraph.HasNeighbors(s, step)
-	})
-}
-
-// HasLikedShoutsWith applies the HasEdge predicate on the "liked_shouts" edge with a given conditions (other predicates).
-func HasLikedShoutsWith(preds ...predicate.Shout) predicate.User {
-	return predicate.User(func(s *sql.Selector) {
-		step := sqlgraph.NewStep(
-			sqlgraph.From(Table, FieldID),
-			sqlgraph.To(LikedShoutsInverseTable, FieldID),
-			sqlgraph.Edge(sqlgraph.M2M, true, LikedShoutsTable, LikedShoutsPrimaryKey...),
-		)
-		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
-			for _, p := range preds {
-				p(s)
-			}
-		})
-	})
-}
-
 // HasSettings applies the HasEdge predicate on the "settings" edge.
 func HasSettings() predicate.User {
 	return predicate.User(func(s *sql.Selector) {
@@ -1021,6 +632,34 @@ func HasSettingsWith(preds ...predicate.UserSettings) predicate.User {
 			sqlgraph.From(Table, FieldID),
 			sqlgraph.To(SettingsInverseTable, FieldID),
 			sqlgraph.Edge(sqlgraph.O2O, false, SettingsTable, SettingsColumn),
+		)
+		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
+			for _, p := range preds {
+				p(s)
+			}
+		})
+	})
+}
+
+// HasDiets applies the HasEdge predicate on the "diets" edge.
+func HasDiets() predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DietsTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DietsTable, DietsColumn),
+		)
+		sqlgraph.HasNeighbors(s, step)
+	})
+}
+
+// HasDietsWith applies the HasEdge predicate on the "diets" edge with a given conditions (other predicates).
+func HasDietsWith(preds ...predicate.Diet) predicate.User {
+	return predicate.User(func(s *sql.Selector) {
+		step := sqlgraph.NewStep(
+			sqlgraph.From(Table, FieldID),
+			sqlgraph.To(DietsInverseTable, FieldID),
+			sqlgraph.Edge(sqlgraph.O2M, false, DietsTable, DietsColumn),
 		)
 		sqlgraph.HasNeighborsWith(s, step, func(s *sql.Selector) {
 			for _, p := range preds {

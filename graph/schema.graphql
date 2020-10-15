@@ -49,37 +49,7 @@ type User implements Node {
   email: String!
   username: String!
   settings: UserSettings
-  programs(
-    after: Cursor
-    first: Int
-    before: Cursor
-    last: Int
-    orderBy: ProgramOrder
-  ): ProgramConnection
-  followers(
-    after: Cursor
-    first: Int
-    before: Cursor
-    last: Int
-    orderBy: UserOrder
-  ): UserConnection
-  follows(
-    after: Cursor
-    first: Int
-    before: Cursor
-    last: Int
-    orderBy: UserOrder
-  ): UserConnection
-  shouts(
-    after: Cursor
-    first: Int
-    before: Cursor
-    last: Int
-    orderBy: ShoutOrder
-  ): ShoutConnection
-  followersCount: Int!
-  followsCount: Int!
-  shoutsCount: Int!
+  diets: [Diet]
 }
 
 type UserEdge {
@@ -102,96 +72,6 @@ input UserOrder {
   field: UserOrderField
 }
 
-type Program implements Node {
-  id: ID!
-  createdAt: Time
-  name: String!
-  author: User!
-  workouts(
-    after: Cursor
-    first: Int
-    before: Cursor
-    last: Int
-    orderBy: WorkoutOrder
-  ): WorkoutConnection
-}
-
-type ProgramEdge {
-  node: Program
-  cursor: Cursor
-}
-
-type ProgramConnection {
-  pageInfo: PageInfo
-  edges: [ProgramEdge]
-}
-
-enum ProgramOrderField {
-  CREATED_AT
-  UPDATED_AT
-}
-
-enum ShoutOrderField {
-  LIKES
-  CREATED_AT
-  UPDATED_AT
-}
-
-input ProgramOrder {
-  direction: OrderDirection!
-  field: ProgramOrderField
-}
-
-type Workout implements Node {
-  id: ID!
-  name: String!
-  program: Program!
-}
-
-type WorkoutEdge {
-  node: Workout
-  cursor: Cursor
-}
-
-type WorkoutConnection {
-  pageInfo: PageInfo
-  edges: [WorkoutEdge]
-}
-
-enum WorkoutOrderField {
-  CREATED_AT
-  UPDATED_AT
-}
-
-input WorkoutOrder {
-  direction: OrderDirection!
-  field: WorkoutOrderField
-}
-
-input ShoutOrder {
-  direction: OrderDirection!
-  field: ShoutOrderField
-}
-
-type Shout implements Node {
-  id: ID!
-  message: String!
-  author: User!
-  createdAt: Time
-  likedBy: [User]
-  likes: Int
-}
-
-type ShoutEdge {
-  node: Shout
-  cursor: Cursor
-}
-
-type ShoutConnection {
-  pageInfo: PageInfo
-  edges: [ShoutEdge]
-}
-
 input LoginInput {
   username: String!
   password: String!
@@ -208,26 +88,11 @@ type AuthPayload {
   token: String
 }
 
-input CreateProgramInput {
-  name: String!
-  userID: ID!
-}
-
-input FollowUserInput {
-  followID: ID!
-  userID: ID!
-}
-
-input UnFollowUserInput {
-  followID: ID!
-  userID: ID!
-}
-
 type Query {
-  whoami: User! @log
+  whoami: User!
   ping: String!
   node(id: ID!): Node
-  me(id: ID!): User! @hasID
+  me(id: ID!): User!
   users(
     after: Cursor
     first: Int
@@ -235,52 +100,6 @@ type Query {
     last: Int
     orderBy: UserOrder
   ): UserConnection
-  programs(
-    after: Cursor
-    first: Int
-    before: Cursor
-    last: Int
-    orderBy: ProgramOrder
-  ): ProgramConnection
-  feed(
-    after: Cursor
-    first: Int
-    before: Cursor
-    last: Int
-    orderBy: ShoutOrder
-    id: ID!
-  ): ShoutConnection @hasID
-  shouts(
-    after: Cursor
-    first: Int
-    before: Cursor
-    last: Int
-    orderBy: ShoutOrder
-  ): ShoutConnection
-  programByID(id: ID!): Program!
-  myPrograms(
-    after: Cursor
-    first: Int
-    before: Cursor
-    last: Int
-    orderBy: ProgramOrder
-    id: ID!
-  ): ProgramConnection!
-}
-
-input CreateShoutInput {
-  message: String!
-  userID: ID!
-}
-
-input LikeShoutInput {
-  ShoutID: ID!
-  UserID: ID!
-}
-
-input UnlikeShoutInput {
-  ShoutID: ID!
-  UserID: ID!
 }
 
 input UserSettingsInput {
@@ -296,25 +115,26 @@ input AddUserSettingsInput {
   settings: UserSettingsInput
 }
 
-input WorkoutInput {
-  name: String!
-}
-
-input CreateWorkoutInput {
-  userID: ID!
-  workout: WorkoutInput
-}
-
 type Mutation {
   usernameAvailable(username: String!): Boolean
   login(input: LoginInput!): AuthPayload @log
   signup(input: SignupInput!): AuthPayload
-  createProgram(input: CreateProgramInput!): Program!
-  createWorkout(input: CreateWorkoutInput!): Workout!
-  createShout(input: CreateShoutInput!): Shout!
-  likeShout(input: LikeShoutInput!): Shout!
-  unlikeShout(input: UnlikeShoutInput!): Shout!
-  followUser(input: FollowUserInput!): User
-  unFollowUser(input: UnFollowUserInput!): User
   addUserSettings(input: AddUserSettingsInput!): UserSettings!
+  createDiet(input: CreateDietInput!): Diet!
+}
+
+input CreateDietInput {
+  name: String!
+  userID: ID!
+}
+
+#Diet
+type Diet implements Node {
+  id: ID!
+  createdAt: Time
+  updatedAt: Time
+  name: String!
+  user: User!
+  goalWeight: Int!
+  length: Int!
 }

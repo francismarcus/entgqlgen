@@ -27,12 +27,6 @@ type User struct {
 	Email string `json:"email,omitempty"`
 	// Password holds the value of the "password" field.
 	Password string `json:"password,omitempty"`
-	// FollowsCount holds the value of the "follows_count" field.
-	FollowsCount int `json:"follows_count,omitempty"`
-	// FollowersCount holds the value of the "followers_count" field.
-	FollowersCount int `json:"followers_count,omitempty"`
-	// ShoutsCount holds the value of the "shouts_count" field.
-	ShoutsCount int `json:"shouts_count,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
 	// The values are being populated by the UserQuery when eager-loading is set.
 	Edges UserEdges `json:"edges"`
@@ -40,72 +34,19 @@ type User struct {
 
 // UserEdges holds the relations/edges for other nodes in the graph.
 type UserEdges struct {
-	// Followers holds the value of the followers edge.
-	Followers []*User
-	// Following holds the value of the following edge.
-	Following []*User
-	// Programs holds the value of the programs edge.
-	Programs []*Program
-	// Shouts holds the value of the shouts edge.
-	Shouts []*Shout
-	// LikedShouts holds the value of the liked_shouts edge.
-	LikedShouts []*Shout
 	// Settings holds the value of the settings edge.
 	Settings *UserSettings
+	// Diets holds the value of the diets edge.
+	Diets []*Diet
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [6]bool
-}
-
-// FollowersOrErr returns the Followers value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) FollowersOrErr() ([]*User, error) {
-	if e.loadedTypes[0] {
-		return e.Followers, nil
-	}
-	return nil, &NotLoadedError{edge: "followers"}
-}
-
-// FollowingOrErr returns the Following value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) FollowingOrErr() ([]*User, error) {
-	if e.loadedTypes[1] {
-		return e.Following, nil
-	}
-	return nil, &NotLoadedError{edge: "following"}
-}
-
-// ProgramsOrErr returns the Programs value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) ProgramsOrErr() ([]*Program, error) {
-	if e.loadedTypes[2] {
-		return e.Programs, nil
-	}
-	return nil, &NotLoadedError{edge: "programs"}
-}
-
-// ShoutsOrErr returns the Shouts value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) ShoutsOrErr() ([]*Shout, error) {
-	if e.loadedTypes[3] {
-		return e.Shouts, nil
-	}
-	return nil, &NotLoadedError{edge: "shouts"}
-}
-
-// LikedShoutsOrErr returns the LikedShouts value or an error if the edge
-// was not loaded in eager-loading.
-func (e UserEdges) LikedShoutsOrErr() ([]*Shout, error) {
-	if e.loadedTypes[4] {
-		return e.LikedShouts, nil
-	}
-	return nil, &NotLoadedError{edge: "liked_shouts"}
+	loadedTypes [2]bool
 }
 
 // SettingsOrErr returns the Settings value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
 func (e UserEdges) SettingsOrErr() (*UserSettings, error) {
-	if e.loadedTypes[5] {
+	if e.loadedTypes[0] {
 		if e.Settings == nil {
 			// The edge settings was loaded in eager-loading,
 			// but was not found.
@@ -114,6 +55,15 @@ func (e UserEdges) SettingsOrErr() (*UserSettings, error) {
 		return e.Settings, nil
 	}
 	return nil, &NotLoadedError{edge: "settings"}
+}
+
+// DietsOrErr returns the Diets value or an error if the edge
+// was not loaded in eager-loading.
+func (e UserEdges) DietsOrErr() ([]*Diet, error) {
+	if e.loadedTypes[1] {
+		return e.Diets, nil
+	}
+	return nil, &NotLoadedError{edge: "diets"}
 }
 
 // scanValues returns the types for scanning values from sql.Rows.
@@ -125,9 +75,6 @@ func (*User) scanValues() []interface{} {
 		&sql.NullString{}, // username
 		&sql.NullString{}, // email
 		&sql.NullString{}, // password
-		&sql.NullInt64{},  // follows_count
-		&sql.NullInt64{},  // followers_count
-		&sql.NullInt64{},  // shouts_count
 	}
 }
 
@@ -168,52 +115,17 @@ func (u *User) assignValues(values ...interface{}) error {
 	} else if value.Valid {
 		u.Password = value.String
 	}
-	if value, ok := values[5].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field follows_count", values[5])
-	} else if value.Valid {
-		u.FollowsCount = int(value.Int64)
-	}
-	if value, ok := values[6].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field followers_count", values[6])
-	} else if value.Valid {
-		u.FollowersCount = int(value.Int64)
-	}
-	if value, ok := values[7].(*sql.NullInt64); !ok {
-		return fmt.Errorf("unexpected type %T for field shouts_count", values[7])
-	} else if value.Valid {
-		u.ShoutsCount = int(value.Int64)
-	}
 	return nil
-}
-
-// QueryFollowers queries the followers edge of the User.
-func (u *User) QueryFollowers() *UserQuery {
-	return (&UserClient{config: u.config}).QueryFollowers(u)
-}
-
-// QueryFollowing queries the following edge of the User.
-func (u *User) QueryFollowing() *UserQuery {
-	return (&UserClient{config: u.config}).QueryFollowing(u)
-}
-
-// QueryPrograms queries the programs edge of the User.
-func (u *User) QueryPrograms() *ProgramQuery {
-	return (&UserClient{config: u.config}).QueryPrograms(u)
-}
-
-// QueryShouts queries the shouts edge of the User.
-func (u *User) QueryShouts() *ShoutQuery {
-	return (&UserClient{config: u.config}).QueryShouts(u)
-}
-
-// QueryLikedShouts queries the liked_shouts edge of the User.
-func (u *User) QueryLikedShouts() *ShoutQuery {
-	return (&UserClient{config: u.config}).QueryLikedShouts(u)
 }
 
 // QuerySettings queries the settings edge of the User.
 func (u *User) QuerySettings() *UserSettingsQuery {
 	return (&UserClient{config: u.config}).QuerySettings(u)
+}
+
+// QueryDiets queries the diets edge of the User.
+func (u *User) QueryDiets() *DietQuery {
+	return (&UserClient{config: u.config}).QueryDiets(u)
 }
 
 // Update returns a builder for updating this User.
@@ -249,12 +161,6 @@ func (u *User) String() string {
 	builder.WriteString(u.Email)
 	builder.WriteString(", password=")
 	builder.WriteString(u.Password)
-	builder.WriteString(", follows_count=")
-	builder.WriteString(fmt.Sprintf("%v", u.FollowsCount))
-	builder.WriteString(", followers_count=")
-	builder.WriteString(fmt.Sprintf("%v", u.FollowersCount))
-	builder.WriteString(", shouts_count=")
-	builder.WriteString(fmt.Sprintf("%v", u.ShoutsCount))
 	builder.WriteByte(')')
 	return builder.String()
 }

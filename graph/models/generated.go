@@ -20,29 +20,9 @@ type AuthPayload struct {
 	Token *string   `json:"token"`
 }
 
-type CreateProgramInput struct {
+type CreateDietInput struct {
 	Name   string `json:"name"`
 	UserID int    `json:"userID"`
-}
-
-type CreateShoutInput struct {
-	Message string `json:"message"`
-	UserID  int    `json:"userID"`
-}
-
-type CreateWorkoutInput struct {
-	UserID  int           `json:"userID"`
-	Workout *WorkoutInput `json:"workout"`
-}
-
-type FollowUserInput struct {
-	FollowID int `json:"followID"`
-	UserID   int `json:"userID"`
-}
-
-type LikeShoutInput struct {
-	ShoutID int `json:"ShoutID"`
-	UserID  int `json:"UserID"`
 }
 
 type LoginInput struct {
@@ -56,26 +36,12 @@ type SignupInput struct {
 	Email    string `json:"email"`
 }
 
-type UnFollowUserInput struct {
-	FollowID int `json:"followID"`
-	UserID   int `json:"userID"`
-}
-
-type UnlikeShoutInput struct {
-	ShoutID int `json:"ShoutID"`
-	UserID  int `json:"UserID"`
-}
-
 type UserSettingsInput struct {
 	Gender *Gender `json:"gender"`
 	Age    *int    `json:"age"`
 	Weight *int    `json:"weight"`
 	Height *int    `json:"height"`
 	Level  *Level  `json:"level"`
-}
-
-type WorkoutInput struct {
-	Name string `json:"name"`
 }
 
 type Gender string

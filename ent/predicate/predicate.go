@@ -6,20 +6,11 @@ import (
 	"github.com/facebook/ent/dialect/sql"
 )
 
-// Exercise is the predicate function for exercise builders.
-type Exercise func(*sql.Selector)
-
-// Program is the predicate function for program builders.
-type Program func(*sql.Selector)
-
-// Shout is the predicate function for shout builders.
-type Shout func(*sql.Selector)
+// Diet is the predicate function for diet builders.
+type Diet func(*sql.Selector)
 
 // User is the predicate function for user builders.
 type User func(*sql.Selector)
 
 // UserSettings is the predicate function for usersettings builders.
 type UserSettings func(*sql.Selector)
-
-// Workout is the predicate function for workout builders.
-type Workout func(*sql.Selector)

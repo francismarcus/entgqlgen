@@ -21,51 +21,14 @@ const (
 	FieldEmail = "email"
 	// FieldPassword holds the string denoting the password field in the database.
 	FieldPassword = "password"
-	// FieldFollowsCount holds the string denoting the follows_count field in the database.
-	FieldFollowsCount = "follows_count"
-	// FieldFollowersCount holds the string denoting the followers_count field in the database.
-	FieldFollowersCount = "followers_count"
-	// FieldShoutsCount holds the string denoting the shouts_count field in the database.
-	FieldShoutsCount = "shouts_count"
 
-	// EdgeFollowers holds the string denoting the followers edge name in mutations.
-	EdgeFollowers = "followers"
-	// EdgeFollowing holds the string denoting the following edge name in mutations.
-	EdgeFollowing = "following"
-	// EdgePrograms holds the string denoting the programs edge name in mutations.
-	EdgePrograms = "programs"
-	// EdgeShouts holds the string denoting the shouts edge name in mutations.
-	EdgeShouts = "shouts"
-	// EdgeLikedShouts holds the string denoting the liked_shouts edge name in mutations.
-	EdgeLikedShouts = "liked_shouts"
 	// EdgeSettings holds the string denoting the settings edge name in mutations.
 	EdgeSettings = "settings"
+	// EdgeDiets holds the string denoting the diets edge name in mutations.
+	EdgeDiets = "diets"
 
 	// Table holds the table name of the user in the database.
 	Table = "users"
-	// FollowersTable is the table the holds the followers relation/edge. The primary key declared below.
-	FollowersTable = "user_following"
-	// FollowingTable is the table the holds the following relation/edge. The primary key declared below.
-	FollowingTable = "user_following"
-	// ProgramsTable is the table the holds the programs relation/edge.
-	ProgramsTable = "programs"
-	// ProgramsInverseTable is the table name for the Program entity.
-	// It exists in this package in order to avoid circular dependency with the "program" package.
-	ProgramsInverseTable = "programs"
-	// ProgramsColumn is the table column denoting the programs relation/edge.
-	ProgramsColumn = "user_programs"
-	// ShoutsTable is the table the holds the shouts relation/edge.
-	ShoutsTable = "shouts"
-	// ShoutsInverseTable is the table name for the Shout entity.
-	// It exists in this package in order to avoid circular dependency with the "shout" package.
-	ShoutsInverseTable = "shouts"
-	// ShoutsColumn is the table column denoting the shouts relation/edge.
-	ShoutsColumn = "user_shouts"
-	// LikedShoutsTable is the table the holds the liked_shouts relation/edge. The primary key declared below.
-	LikedShoutsTable = "shout_liked_by"
-	// LikedShoutsInverseTable is the table name for the Shout entity.
-	// It exists in this package in order to avoid circular dependency with the "shout" package.
-	LikedShoutsInverseTable = "shouts"
 	// SettingsTable is the table the holds the settings relation/edge.
 	SettingsTable = "user_settings"
 	// SettingsInverseTable is the table name for the UserSettings entity.
@@ -73,6 +36,13 @@ const (
 	SettingsInverseTable = "user_settings"
 	// SettingsColumn is the table column denoting the settings relation/edge.
 	SettingsColumn = "user_settings"
+	// DietsTable is the table the holds the diets relation/edge.
+	DietsTable = "diets"
+	// DietsInverseTable is the table name for the Diet entity.
+	// It exists in this package in order to avoid circular dependency with the "diet" package.
+	DietsInverseTable = "diets"
+	// DietsColumn is the table column denoting the diets relation/edge.
+	DietsColumn = "user_diets"
 )
 
 // Columns holds all SQL columns for user fields.
@@ -83,22 +53,7 @@ var Columns = []string{
 	FieldUsername,
 	FieldEmail,
 	FieldPassword,
-	FieldFollowsCount,
-	FieldFollowersCount,
-	FieldShoutsCount,
 }
-
-var (
-	// FollowersPrimaryKey and FollowersColumn2 are the table columns denoting the
-	// primary key for the followers relation (M2M).
-	FollowersPrimaryKey = []string{"user_id", "follower_id"}
-	// FollowingPrimaryKey and FollowingColumn2 are the table columns denoting the
-	// primary key for the following relation (M2M).
-	FollowingPrimaryKey = []string{"user_id", "follower_id"}
-	// LikedShoutsPrimaryKey and LikedShoutsColumn2 are the table columns denoting the
-	// primary key for the liked_shouts relation (M2M).
-	LikedShoutsPrimaryKey = []string{"shout_id", "user_id"}
-)
 
 // ValidColumn reports if the column name is valid (part of the table columns).
 func ValidColumn(column string) bool {
@@ -119,10 +74,4 @@ var (
 	UpdateDefaultUpdatedAt func() time.Time
 	// EmailValidator is a validator for the "email" field. It is called by the builders before save.
 	EmailValidator func(string) error
-	// DefaultFollowsCount holds the default value on creation for the follows_count field.
-	DefaultFollowsCount int
-	// DefaultFollowersCount holds the default value on creation for the followers_count field.
-	DefaultFollowersCount int
-	// DefaultShoutsCount holds the default value on creation for the shouts_count field.
-	DefaultShoutsCount int
 )

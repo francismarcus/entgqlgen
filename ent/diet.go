@@ -8,12 +8,12 @@ import (
 	"time"
 
 	"github.com/facebook/ent/dialect/sql"
-	"github.com/francismarcus/eg/ent/program"
+	"github.com/francismarcus/eg/ent/diet"
 	"github.com/francismarcus/eg/ent/user"
 )
 
-// Program is the model entity for the Program schema.
-type Program struct {
+// Diet is the model entity for the Diet schema.
+type Diet struct {
 	config `json:"-"`
 	// ID of the ent.
 	ID int `json:"id,omitempty"`
@@ -23,26 +23,28 @@ type Program struct {
 	UpdatedAt time.Time `json:"updated_at,omitempty"`
 	// Name holds the value of the "name" field.
 	Name string `json:"name,omitempty"`
+	// GoalWeight holds the value of the "goal_weight" field.
+	GoalWeight int `json:"goal_weight,omitempty"`
+	// Length holds the value of the "length" field.
+	Length int `json:"length,omitempty"`
 	// Edges holds the relations/edges for other nodes in the graph.
-	// The values are being populated by the ProgramQuery when eager-loading is set.
-	Edges         ProgramEdges `json:"edges"`
-	user_programs *int
+	// The values are being populated by the DietQuery when eager-loading is set.
+	Edges      DietEdges `json:"edges"`
+	user_diets *int
 }
 
-// ProgramEdges holds the relations/edges for other nodes in the graph.
-type ProgramEdges struct {
+// DietEdges holds the relations/edges for other nodes in the graph.
+type DietEdges struct {
 	// Author holds the value of the author edge.
 	Author *User
-	// Workouts holds the value of the workouts edge.
-	Workouts []*Workout
 	// loadedTypes holds the information for reporting if a
 	// type was loaded (or requested) in eager-loading or not.
-	loadedTypes [2]bool
+	loadedTypes [1]bool
 }
 
 // AuthorOrErr returns the Author value or an error if the edge
 // was not loaded in eager-loading, or loaded but was not found.
-func (e ProgramEdges) AuthorOrErr() (*User, error) {
+func (e DietEdges) AuthorOrErr() (*User, error) {
 	if e.loadedTypes[0] {
 		if e.Author == nil {
 			// The edge author was loaded in eager-loading,
@@ -54,119 +56,121 @@ func (e ProgramEdges) AuthorOrErr() (*User, error) {
 	return nil, &NotLoadedError{edge: "author"}
 }
 
-// WorkoutsOrErr returns the Workouts value or an error if the edge
-// was not loaded in eager-loading.
-func (e ProgramEdges) WorkoutsOrErr() ([]*Workout, error) {
-	if e.loadedTypes[1] {
-		return e.Workouts, nil
-	}
-	return nil, &NotLoadedError{edge: "workouts"}
-}
-
 // scanValues returns the types for scanning values from sql.Rows.
-func (*Program) scanValues() []interface{} {
+func (*Diet) scanValues() []interface{} {
 	return []interface{}{
 		&sql.NullInt64{},  // id
 		&sql.NullTime{},   // created_at
 		&sql.NullTime{},   // updated_at
 		&sql.NullString{}, // name
+		&sql.NullInt64{},  // goal_weight
+		&sql.NullInt64{},  // length
 	}
 }
 
 // fkValues returns the types for scanning foreign-keys values from sql.Rows.
-func (*Program) fkValues() []interface{} {
+func (*Diet) fkValues() []interface{} {
 	return []interface{}{
-		&sql.NullInt64{}, // user_programs
+		&sql.NullInt64{}, // user_diets
 	}
 }
 
 // assignValues assigns the values that were returned from sql.Rows (after scanning)
-// to the Program fields.
-func (pr *Program) assignValues(values ...interface{}) error {
-	if m, n := len(values), len(program.Columns); m < n {
+// to the Diet fields.
+func (d *Diet) assignValues(values ...interface{}) error {
+	if m, n := len(values), len(diet.Columns); m < n {
 		return fmt.Errorf("mismatch number of scan values: %d != %d", m, n)
 	}
 	value, ok := values[0].(*sql.NullInt64)
 	if !ok {
 		return fmt.Errorf("unexpected type %T for field id", value)
 	}
-	pr.ID = int(value.Int64)
+	d.ID = int(value.Int64)
 	values = values[1:]
 	if value, ok := values[0].(*sql.NullTime); !ok {
 		return fmt.Errorf("unexpected type %T for field created_at", values[0])
 	} else if value.Valid {
-		pr.CreatedAt = value.Time
+		d.CreatedAt = value.Time
 	}
 	if value, ok := values[1].(*sql.NullTime); !ok {
 		return fmt.Errorf("unexpected type %T for field updated_at", values[1])
 	} else if value.Valid {
-		pr.UpdatedAt = value.Time
+		d.UpdatedAt = value.Time
 	}
 	if value, ok := values[2].(*sql.NullString); !ok {
 		return fmt.Errorf("unexpected type %T for field name", values[2])
 	} else if value.Valid {
-		pr.Name = value.String
+		d.Name = value.String
 	}
-	values = values[3:]
-	if len(values) == len(program.ForeignKeys) {
+	if value, ok := values[3].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field goal_weight", values[3])
+	} else if value.Valid {
+		d.GoalWeight = int(value.Int64)
+	}
+	if value, ok := values[4].(*sql.NullInt64); !ok {
+		return fmt.Errorf("unexpected type %T for field length", values[4])
+	} else if value.Valid {
+		d.Length = int(value.Int64)
+	}
+	values = values[5:]
+	if len(values) == len(diet.ForeignKeys) {
 		if value, ok := values[0].(*sql.NullInt64); !ok {
-			return fmt.Errorf("unexpected type %T for edge-field user_programs", value)
+			return fmt.Errorf("unexpected type %T for edge-field user_diets", value)
 		} else if value.Valid {
-			pr.user_programs = new(int)
-			*pr.user_programs = int(value.Int64)
+			d.user_diets = new(int)
+			*d.user_diets = int(value.Int64)
 		}
 	}
 	return nil
 }
 
-// QueryAuthor queries the author edge of the Program.
-func (pr *Program) QueryAuthor() *UserQuery {
-	return (&ProgramClient{config: pr.config}).QueryAuthor(pr)
+// QueryAuthor queries the author edge of the Diet.
+func (d *Diet) QueryAuthor() *UserQuery {
+	return (&DietClient{config: d.config}).QueryAuthor(d)
 }
 
-// QueryWorkouts queries the workouts edge of the Program.
-func (pr *Program) QueryWorkouts() *WorkoutQuery {
-	return (&ProgramClient{config: pr.config}).QueryWorkouts(pr)
-}
-
-// Update returns a builder for updating this Program.
-// Note that, you need to call Program.Unwrap() before calling this method, if this Program
+// Update returns a builder for updating this Diet.
+// Note that, you need to call Diet.Unwrap() before calling this method, if this Diet
 // was returned from a transaction, and the transaction was committed or rolled back.
-func (pr *Program) Update() *ProgramUpdateOne {
-	return (&ProgramClient{config: pr.config}).UpdateOne(pr)
+func (d *Diet) Update() *DietUpdateOne {
+	return (&DietClient{config: d.config}).UpdateOne(d)
 }
 
 // Unwrap unwraps the entity that was returned from a transaction after it was closed,
 // so that all next queries will be executed through the driver which created the transaction.
-func (pr *Program) Unwrap() *Program {
-	tx, ok := pr.config.driver.(*txDriver)
+func (d *Diet) Unwrap() *Diet {
+	tx, ok := d.config.driver.(*txDriver)
 	if !ok {
-		panic("ent: Program is not a transactional entity")
+		panic("ent: Diet is not a transactional entity")
 	}
-	pr.config.driver = tx.drv
-	return pr
+	d.config.driver = tx.drv
+	return d
 }
 
 // String implements the fmt.Stringer.
-func (pr *Program) String() string {
+func (d *Diet) String() string {
 	var builder strings.Builder
-	builder.WriteString("Program(")
-	builder.WriteString(fmt.Sprintf("id=%v", pr.ID))
+	builder.WriteString("Diet(")
+	builder.WriteString(fmt.Sprintf("id=%v", d.ID))
 	builder.WriteString(", created_at=")
-	builder.WriteString(pr.CreatedAt.Format(time.ANSIC))
+	builder.WriteString(d.CreatedAt.Format(time.ANSIC))
 	builder.WriteString(", updated_at=")
-	builder.WriteString(pr.UpdatedAt.Format(time.ANSIC))
+	builder.WriteString(d.UpdatedAt.Format(time.ANSIC))
 	builder.WriteString(", name=")
-	builder.WriteString(pr.Name)
+	builder.WriteString(d.Name)
+	builder.WriteString(", goal_weight=")
+	builder.WriteString(fmt.Sprintf("%v", d.GoalWeight))
+	builder.WriteString(", length=")
+	builder.WriteString(fmt.Sprintf("%v", d.Length))
 	builder.WriteByte(')')
 	return builder.String()
 }
 
-// Programs is a parsable slice of Program.
-type Programs []*Program
+// Diets is a parsable slice of Diet.
+type Diets []*Diet
 
-func (pr Programs) config(cfg config) {
-	for _i := range pr {
-		pr[_i].config = cfg
+func (d Diets) config(cfg config) {
+	for _i := range d {
+		d[_i].config = cfg
 	}
 }

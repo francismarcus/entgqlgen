@@ -8,58 +8,25 @@ import (
 )
 
 var (
-	// ExercisesColumns holds the columns for the "exercises" table.
-	ExercisesColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-	}
-	// ExercisesTable holds the schema information for the "exercises" table.
-	ExercisesTable = &schema.Table{
-		Name:        "exercises",
-		Columns:     ExercisesColumns,
-		PrimaryKey:  []*schema.Column{ExercisesColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{},
-	}
-	// ProgramsColumns holds the columns for the "programs" table.
-	ProgramsColumns = []*schema.Column{
+	// DietsColumns holds the columns for the "diets" table.
+	DietsColumns = []*schema.Column{
 		{Name: "id", Type: field.TypeInt, Increment: true},
 		{Name: "created_at", Type: field.TypeTime},
 		{Name: "updated_at", Type: field.TypeTime},
 		{Name: "name", Type: field.TypeString},
-		{Name: "user_programs", Type: field.TypeInt, Nullable: true},
+		{Name: "goal_weight", Type: field.TypeInt},
+		{Name: "length", Type: field.TypeInt},
+		{Name: "user_diets", Type: field.TypeInt, Nullable: true},
 	}
-	// ProgramsTable holds the schema information for the "programs" table.
-	ProgramsTable = &schema.Table{
-		Name:       "programs",
-		Columns:    ProgramsColumns,
-		PrimaryKey: []*schema.Column{ProgramsColumns[0]},
+	// DietsTable holds the schema information for the "diets" table.
+	DietsTable = &schema.Table{
+		Name:       "diets",
+		Columns:    DietsColumns,
+		PrimaryKey: []*schema.Column{DietsColumns[0]},
 		ForeignKeys: []*schema.ForeignKey{
 			{
-				Symbol:  "programs_users_programs",
-				Columns: []*schema.Column{ProgramsColumns[4]},
-
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// ShoutsColumns holds the columns for the "shouts" table.
-	ShoutsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "message", Type: field.TypeString},
-		{Name: "likes", Type: field.TypeInt},
-		{Name: "user_shouts", Type: field.TypeInt, Nullable: true},
-	}
-	// ShoutsTable holds the schema information for the "shouts" table.
-	ShoutsTable = &schema.Table{
-		Name:       "shouts",
-		Columns:    ShoutsColumns,
-		PrimaryKey: []*schema.Column{ShoutsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "shouts_users_shouts",
-				Columns: []*schema.Column{ShoutsColumns[5]},
+				Symbol:  "diets_users_diets",
+				Columns: []*schema.Column{DietsColumns[6]},
 
 				RefColumns: []*schema.Column{UsersColumns[0]},
 				OnDelete:   schema.SetNull,
@@ -74,9 +41,6 @@ var (
 		{Name: "username", Type: field.TypeString, Unique: true},
 		{Name: "email", Type: field.TypeString, Unique: true},
 		{Name: "password", Type: field.TypeString},
-		{Name: "follows_count", Type: field.TypeInt},
-		{Name: "followers_count", Type: field.TypeInt},
-		{Name: "shouts_count", Type: field.TypeInt},
 	}
 	// UsersTable holds the schema information for the "users" table.
 	UsersTable = &schema.Table{
@@ -110,103 +74,15 @@ var (
 			},
 		},
 	}
-	// WorkoutsColumns holds the columns for the "workouts" table.
-	WorkoutsColumns = []*schema.Column{
-		{Name: "id", Type: field.TypeInt, Increment: true},
-		{Name: "created_at", Type: field.TypeTime},
-		{Name: "updated_at", Type: field.TypeTime},
-		{Name: "name", Type: field.TypeString},
-		{Name: "program_workouts", Type: field.TypeInt, Nullable: true},
-	}
-	// WorkoutsTable holds the schema information for the "workouts" table.
-	WorkoutsTable = &schema.Table{
-		Name:       "workouts",
-		Columns:    WorkoutsColumns,
-		PrimaryKey: []*schema.Column{WorkoutsColumns[0]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "workouts_programs_workouts",
-				Columns: []*schema.Column{WorkoutsColumns[4]},
-
-				RefColumns: []*schema.Column{ProgramsColumns[0]},
-				OnDelete:   schema.SetNull,
-			},
-		},
-	}
-	// ShoutLikedByColumns holds the columns for the "shout_liked_by" table.
-	ShoutLikedByColumns = []*schema.Column{
-		{Name: "shout_id", Type: field.TypeInt},
-		{Name: "user_id", Type: field.TypeInt},
-	}
-	// ShoutLikedByTable holds the schema information for the "shout_liked_by" table.
-	ShoutLikedByTable = &schema.Table{
-		Name:       "shout_liked_by",
-		Columns:    ShoutLikedByColumns,
-		PrimaryKey: []*schema.Column{ShoutLikedByColumns[0], ShoutLikedByColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "shout_liked_by_shout_id",
-				Columns: []*schema.Column{ShoutLikedByColumns[0]},
-
-				RefColumns: []*schema.Column{ShoutsColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:  "shout_liked_by_user_id",
-				Columns: []*schema.Column{ShoutLikedByColumns[1]},
-
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
-	// UserFollowingColumns holds the columns for the "user_following" table.
-	UserFollowingColumns = []*schema.Column{
-		{Name: "user_id", Type: field.TypeInt},
-		{Name: "follower_id", Type: field.TypeInt},
-	}
-	// UserFollowingTable holds the schema information for the "user_following" table.
-	UserFollowingTable = &schema.Table{
-		Name:       "user_following",
-		Columns:    UserFollowingColumns,
-		PrimaryKey: []*schema.Column{UserFollowingColumns[0], UserFollowingColumns[1]},
-		ForeignKeys: []*schema.ForeignKey{
-			{
-				Symbol:  "user_following_user_id",
-				Columns: []*schema.Column{UserFollowingColumns[0]},
-
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-			{
-				Symbol:  "user_following_follower_id",
-				Columns: []*schema.Column{UserFollowingColumns[1]},
-
-				RefColumns: []*schema.Column{UsersColumns[0]},
-				OnDelete:   schema.Cascade,
-			},
-		},
-	}
 	// Tables holds all the tables in the schema.
 	Tables = []*schema.Table{
-		ExercisesTable,
-		ProgramsTable,
-		ShoutsTable,
+		DietsTable,
 		UsersTable,
 		UserSettingsTable,
-		WorkoutsTable,
-		ShoutLikedByTable,
-		UserFollowingTable,
 	}
 )
 
 func init() {
-	ProgramsTable.ForeignKeys[0].RefTable = UsersTable
-	ShoutsTable.ForeignKeys[0].RefTable = UsersTable
+	DietsTable.ForeignKeys[0].RefTable = UsersTable
 	UserSettingsTable.ForeignKeys[0].RefTable = UsersTable
-	WorkoutsTable.ForeignKeys[0].RefTable = ProgramsTable
-	ShoutLikedByTable.ForeignKeys[0].RefTable = ShoutsTable
-	ShoutLikedByTable.ForeignKeys[1].RefTable = UsersTable
-	UserFollowingTable.ForeignKeys[0].RefTable = UsersTable
-	UserFollowingTable.ForeignKeys[1].RefTable = UsersTable
 }

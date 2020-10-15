@@ -9,41 +9,15 @@ import (
 	"github.com/francismarcus/eg/ent"
 )
 
-// The ExerciseFunc type is an adapter to allow the use of ordinary
-// function as Exercise mutator.
-type ExerciseFunc func(context.Context, *ent.ExerciseMutation) (ent.Value, error)
+// The DietFunc type is an adapter to allow the use of ordinary
+// function as Diet mutator.
+type DietFunc func(context.Context, *ent.DietMutation) (ent.Value, error)
 
 // Mutate calls f(ctx, m).
-func (f ExerciseFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ExerciseMutation)
+func (f DietFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
+	mv, ok := m.(*ent.DietMutation)
 	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ExerciseMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The ProgramFunc type is an adapter to allow the use of ordinary
-// function as Program mutator.
-type ProgramFunc func(context.Context, *ent.ProgramMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ProgramFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ProgramMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ProgramMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The ShoutFunc type is an adapter to allow the use of ordinary
-// function as Shout mutator.
-type ShoutFunc func(context.Context, *ent.ShoutMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f ShoutFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.ShoutMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.ShoutMutation", m)
+		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.DietMutation", m)
 	}
 	return f(ctx, mv)
 }
@@ -70,19 +44,6 @@ func (f UserSettingsFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value
 	mv, ok := m.(*ent.UserSettingsMutation)
 	if !ok {
 		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.UserSettingsMutation", m)
-	}
-	return f(ctx, mv)
-}
-
-// The WorkoutFunc type is an adapter to allow the use of ordinary
-// function as Workout mutator.
-type WorkoutFunc func(context.Context, *ent.WorkoutMutation) (ent.Value, error)
-
-// Mutate calls f(ctx, m).
-func (f WorkoutFunc) Mutate(ctx context.Context, m ent.Mutation) (ent.Value, error) {
-	mv, ok := m.(*ent.WorkoutMutation)
-	if !ok {
-		return nil, fmt.Errorf("unexpected mutation type %T. expect *ent.WorkoutMutation", m)
 	}
 	return f(ctx, mv)
 }
